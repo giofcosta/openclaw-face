@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Face } from './components/Face';
 import { StatusBar } from './components/StatusBar';
 import { ChatBubble } from './components/ChatBubble';
+import { AvatarGenerator } from './components/AvatarGenerator';
 import { useGateway } from './hooks/useGateway';
 
 function App() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAvatarGenerator, setShowAvatarGenerator] = useState(false);
 
   // Load config on mount based on environment
   useEffect(() => {
@@ -102,6 +104,15 @@ function App() {
         theme={config?.theme}
       />
 
+      {/* Avatar Generator Toggle */}
+      <button
+        onClick={() => setShowAvatarGenerator(!showAvatarGenerator)}
+        className="absolute bottom-2 left-4 text-xs px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        style={{ color: config?.theme?.text || '#fff' }}
+      >
+        {showAvatarGenerator ? '← Back to Face' : '⚡ Generate Avatar'}
+      </button>
+
       {/* Environment badge + Fullscreen hint */}
       <div className="absolute bottom-2 right-4 flex items-center gap-4 text-xs opacity-30" style={{ color: config?.theme?.text || '#fff' }}>
         {config?.environment === 'staging' && (
@@ -109,6 +120,18 @@ function App() {
         )}
         <span>Press F11 for fullscreen</span>
       </div>
+
+      {/* Avatar Generator Panel */}
+      {showAvatarGenerator && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-8 bg-black/80">
+          <div className="max-w-md w-full">
+            <AvatarGenerator
+              theme={config?.theme}
+              onAvatarGenerated={(result) => console.log('Avatar generated:', result)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
