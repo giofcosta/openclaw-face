@@ -151,7 +151,6 @@ export function Face({ state, config, theme, customAvatar }) {
                 rx="3"
                 fill={faceColor}
                 style={{
-                  animationDelay: `${i * 0.1}s`,
                   animation: `speaking-wave 0.3s ease-in-out infinite`,
                   animationDelay: `${i * 0.05}s`,
                 }}
