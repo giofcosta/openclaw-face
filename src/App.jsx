@@ -106,21 +106,25 @@ function App() {
         theme={config?.theme}
       />
 
-      {/* Avatar Generator Toggle */}
-      <button
-        onClick={() => setShowAvatarGenerator(!showAvatarGenerator)}
-        className="absolute bottom-2 left-4 text-xs px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        style={{ color: config?.theme?.text || '#fff' }}
-      >
-        {showAvatarGenerator ? '← Back to Face' : '⚡ Generate Avatar'}
-      </button>
+      {/* Bottom controls */}
+      <div className="absolute bottom-6 left-0 right-0 px-6 flex items-center justify-between">
+        {/* Avatar Generator Toggle */}
+        <button
+          onClick={() => setShowAvatarGenerator(!showAvatarGenerator)}
+          className="text-sm px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
+          style={{ color: config?.theme?.text || '#fff' }}
+        >
+          <span>⚡</span>
+          <span>{showAvatarGenerator ? 'Back to Face' : 'Generate Avatar'}</span>
+        </button>
 
-      {/* Environment badge + Fullscreen hint */}
-      <div className="absolute bottom-2 right-4 flex items-center gap-4 text-xs opacity-30" style={{ color: config?.theme?.text || '#fff' }}>
-        {config?.environment === 'staging' && (
-          <span className="bg-amber-500/20 text-amber-400 px-2 py-1 rounded opacity-100">STAGING</span>
-        )}
-        <span>Press F11 for fullscreen</span>
+        {/* Environment badge + Fullscreen hint */}
+        <div className="flex items-center gap-4 text-xs" style={{ color: config?.theme?.text || '#fff' }}>
+          {config?.environment === 'staging' && (
+            <span className="bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-full font-medium">STAGING</span>
+          )}
+          <span className="opacity-40">Press F11 for fullscreen</span>
+        </div>
       </div>
 
       {/* Avatar Generator Panel */}

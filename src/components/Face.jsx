@@ -12,15 +12,27 @@ export function Face({ state, config, theme, customAvatar }) {
   // If custom avatar is provided, show it instead of SVG
   if (customAvatar) {
     return (
-      <div className="w-full h-full max-w-[80vh] max-h-[80vh] flex items-center justify-center">
-        <img
-          src={customAvatar}
-          alt="Kratos Avatar"
-          className="w-full h-full object-contain rounded-full"
+      <div className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8">
+        <div 
+          className="relative w-full aspect-square rounded-full overflow-hidden"
           style={{
-            boxShadow: `0 0 40px ${theme?.primary || '#3b82f6'}40`,
+            boxShadow: `0 0 60px ${theme?.primary || '#3b82f6'}60, inset 0 0 60px ${theme?.primary || '#3b82f6'}20`,
+            border: `3px solid ${theme?.primary || '#3b82f6'}80`,
           }}
-        />
+        >
+          <img
+            src={customAvatar}
+            alt="Kratos Avatar"
+            className="w-full h-full object-cover"
+          />
+          {/* Glow ring */}
+          <div 
+            className="absolute inset-0 rounded-full pointer-events-none"
+            style={{
+              boxShadow: `inset 0 0 30px ${theme?.primary || '#3b82f6'}40`,
+            }}
+          />
+        </div>
       </div>
     );
   }
