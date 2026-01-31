@@ -118,16 +118,16 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 sm:p-8">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div
-        className="w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl m-4"
+        className="w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
         style={{
           background: theme?.background || '#0f172a',
           border: `1px solid ${theme?.primary || '#3b82f6'}30`,
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-5 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
@@ -149,7 +149,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
 
         {/* Tabs */}
-        <div className="flex px-8 border-b border-white/10">
+        <div className="flex px-4 sm:px-6 lg:px-8 border-b border-white/10">
           {['generate', 'history'].map((tab) => (
             <button
               key={tab}
@@ -176,7 +176,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {activeTab === 'generate' ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Style Selection */}
@@ -227,7 +227,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                   disabled={loading}
                   className={cn(
                     buttonVariants({ size: 'lg' }),
-                    'w-full mt-4',
+                    'w-full sm:w-auto sm:min-w-[200px] mt-4',
                     loading && 'opacity-70 cursor-not-allowed'
                   )}
                   style={{ background: theme?.primary }}
@@ -269,7 +269,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                 <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
                   Preview
                 </h3>
-                <div className="flex-1 flex items-center justify-center min-h-[300px] rounded-xl bg-white/5 border border-white/10 p-10">
+                <div className="flex-1 flex items-center justify-center min-h-[280px] sm:min-h-[300px] rounded-xl bg-white/5 border border-white/10 p-4 sm:p-6 lg:p-10">
                   {previewUrl ? (
                     <div className="w-full max-w-sm space-y-4">
                       <div
@@ -282,17 +282,17 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <button
                           onClick={() => handleUse(previewUrl)}
-                          className={cn(buttonVariants(), 'flex-1')}
+                          className={cn(buttonVariants(), 'sm:min-w-[140px]')}
                           style={{ background: theme?.primary }}
                         >
                           Use as Face
                         </button>
                         <button
                           onClick={() => handleDownload(previewUrl)}
-                          className={cn(buttonVariants({ variant: 'outline' }), 'flex-1')}
+                          className={cn(buttonVariants({ variant: 'outline' }), 'sm:min-w-[140px]')}
                         >
                           Download
                         </button>
@@ -354,7 +354,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-4 border-t border-white/10 text-center text-xs text-white/40">
+        <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-t border-white/10 text-center text-xs text-white/40">
           Powered by Pollinations.ai • Free unlimited generation
         </div>
       </div>

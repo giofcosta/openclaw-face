@@ -30,7 +30,7 @@ export function StatusBar({ state, identity, message, visible, theme }) {
 
   return (
     <div 
-      className="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-4"
+      className="absolute top-0 left-0 right-0 px-2 sm:px-4 flex items-center justify-center gap-4"
       style={{ color: theme?.text || '#f8fafc' }}
     >
       {/* Identity */}

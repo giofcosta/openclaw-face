@@ -77,7 +77,7 @@ function App() {
 
   return (
     <div 
-      className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden"
+      className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden p-6 sm:p-8 lg:p-12"
       style={{ background: config?.theme?.background || '#0f172a' }}
     >
       {/* Status bar */}
@@ -107,7 +107,7 @@ function App() {
       />
 
       {/* Bottom controls */}
-      <div className="absolute bottom-6 left-0 right-0 px-6 flex items-center justify-between">
+      <div className="absolute bottom-0 left-0 right-0 px-2 sm:px-4 flex items-center justify-between">
         {/* Avatar Generator Toggle */}
         <button
           onClick={() => setShowAvatarGenerator(!showAvatarGenerator)}

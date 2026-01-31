@@ -27,12 +27,12 @@ export function ChatBubble({ message, visible, theme }) {
 
   return (
     <div 
-      className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl"
+      className="absolute bottom-0 left-0 right-0 px-2 sm:px-4 flex justify-center"
       style={{ color: theme?.text || '#f8fafc' }}
     >
       <div 
         ref={containerRef}
-        className="bg-black/40 backdrop-blur-sm rounded-2xl px-6 py-4 max-h-32 overflow-y-auto"
+        className="bg-black/40 backdrop-blur-sm rounded-2xl px-6 py-4 max-h-32 overflow-y-auto w-full max-w-2xl"
         style={{ 
           borderColor: theme?.primary || '#3b82f6',
           borderWidth: '1px',
