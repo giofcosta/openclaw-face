@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { generateKratosAvatar, DEFAULT_PROMPTS } from './avatarGenerator';
+import { generateKratosAvatar, DEFAULT_PROMPTS } from '../lib/avatarGenerator';
 import { buttonVariants, cn } from '../lib/utils';
 
 const STORAGE_KEY = 'kratos-custom-avatar';
