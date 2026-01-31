@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Face } from './components/Face';
 import { StatusBar } from './components/StatusBar';
 import { ChatBubble } from './components/ChatBubble';
-import { AvatarGenerator } from './components/AvatarGenerator';
+import { AvatarGenerator, loadSavedAvatar } from './components/AvatarGenerator';
 import { useGateway } from './hooks/useGateway';
 
 function App() {
@@ -10,7 +10,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAvatarGenerator, setShowAvatarGenerator] = useState(false);
-  const [customAvatar, setCustomAvatar] = useState(null);
+  const [customAvatar, setCustomAvatar] = useState(() => loadSavedAvatar());
 
   // Load config on mount based on environment
   useEffect(() => {
@@ -124,22 +124,17 @@ function App() {
       </div>
 
       {/* Avatar Generator Panel */}
-      {showAvatarGenerator && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-8 bg-black/80">
-          <div className="max-w-md w-full">
-            <AvatarGenerator
-              theme={config?.theme}
-              onAvatarGenerated={(result) => {
-                console.log('Avatar generated:', result);
-                if (result?.useAsFace) {
-                  setCustomAvatar(result.url);
-                  setShowAvatarGenerator(false);
-                }
-              }}
-            />
-          </div>
-        </div>
-      )}
+      <AvatarGenerator
+        isOpen={showAvatarGenerator}
+        onClose={() => setShowAvatarGenerator(false)}
+        theme={config?.theme}
+        onAvatarGenerated={(result) => {
+          console.log('Avatar generated:', result);
+          if (result?.useAsFace) {
+            setCustomAvatar(result.url);
+          }
+        }}
+      />
     </div>
   );
 }
