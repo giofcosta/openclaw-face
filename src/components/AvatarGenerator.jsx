@@ -118,16 +118,16 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 sm:p-8">
       <div
-        className="w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+        className="w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl m-4"
         style={{
           background: theme?.background || '#0f172a',
           border: `1px solid ${theme?.primary || '#3b82f6'}30`,
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-8 py-5 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
@@ -149,7 +149,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
 
         {/* Tabs */}
-        <div className="flex px-6 border-b border-white/10">
+        <div className="flex px-8 border-b border-white/10">
           {['generate', 'history'].map((tab) => (
             <button
               key={tab}
@@ -176,7 +176,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-8">
           {activeTab === 'generate' ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Style Selection */}
@@ -184,13 +184,13 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                 <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
                   Choose Style
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {styles.map((style) => (
                     <button
                       key={style.id}
                       onClick={() => setSelectedStyle(style.id)}
                       className={cn(
-                        'relative p-4 rounded-xl border-2 text-left transition-all group',
+                        'relative p-5 rounded-xl border-2 text-left transition-all group',
                         selectedStyle === style.id
                           ? 'border-primary bg-primary/10'
                           : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
@@ -258,7 +258,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                 </button>
 
                 {error && (
-                  <div className="p-4 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
+                  <div className="p-5 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
                     {error}
                   </div>
                 )}
@@ -269,7 +269,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                 <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
                   Preview
                 </h3>
-                <div className="flex-1 flex items-center justify-center min-h-[300px] rounded-xl bg-white/5 border border-white/10 p-8">
+                <div className="flex-1 flex items-center justify-center min-h-[300px] rounded-xl bg-white/5 border border-white/10 p-10">
                   {previewUrl ? (
                     <div className="w-full max-w-sm space-y-4">
                       <div
@@ -308,9 +308,9 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
               {history.length === 0 ? (
-                <div className="col-span-full text-center py-16 text-white/40">
+                <div className="col-span-full text-center py-16 px-8 text-white/40">
                   <div className="text-5xl mb-4">📷</div>
                   <p>No avatars yet. Generate your first!</p>
                 </div>
@@ -354,7 +354,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-white/10 text-center text-xs text-white/40">
+        <div className="px-8 py-4 border-t border-white/10 text-center text-xs text-white/40">
           Powered by Pollinations.ai • Free unlimited generation
         </div>
       </div>
