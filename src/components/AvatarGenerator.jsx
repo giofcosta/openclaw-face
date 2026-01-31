@@ -74,13 +74,30 @@ export function AvatarGenerator({
     // Don't close - let user see the face change
   };
 
-  const handleDownload = (url) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `kratos-avatar-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async (url) => {
+    try {
+      // Fetch the image as a blob to avoid redirecting
+      const response = await fetch(url);
+      const blob = await response.blob();
+      
+      // Create object URL from blob
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `kratos-avatar-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up object URL
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    } catch (err) {
+      console.error('Download failed:', err);
+      // Fallback: open in new tab
+      window.open(url, '_blank');
+    }
   };
 
   const handleDelete = (id, e) => {
