@@ -10,6 +10,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAvatarGenerator, setShowAvatarGenerator] = useState(false);
+  const [customAvatar, setCustomAvatar] = useState(null);
 
   // Load config on mount based on environment
   useEffect(() => {
@@ -94,6 +95,7 @@ function App() {
           state={state}
           config={config}
           theme={config?.theme}
+          customAvatar={customAvatar}
         />
       </div>
 
@@ -127,7 +129,13 @@ function App() {
           <div className="max-w-md w-full">
             <AvatarGenerator
               theme={config?.theme}
-              onAvatarGenerated={(result) => console.log('Avatar generated:', result)}
+              onAvatarGenerated={(result) => {
+                console.log('Avatar generated:', result);
+                if (result?.useAsFace) {
+                  setCustomAvatar(result.url);
+                  setShowAvatarGenerator(false);
+                }
+              }}
             />
           </div>
         </div>

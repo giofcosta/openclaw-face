@@ -1,13 +1,29 @@
 import { useMemo } from 'react';
 import { STATES } from '../hooks/useGateway';
 
-export function Face({ state, config, theme }) {
+export function Face({ state, config, theme, customAvatar }) {
   const isThinking = state === STATES.THINKING;
   const isSpeaking = state === STATES.SPEAKING;
   const isError = state === STATES.ERROR;
   const isDisconnected = state === STATES.DISCONNECTED || state === STATES.CONNECTING;
 
   const eyeStyle = config?.face?.eyeShape || 'angular';
+
+  // If custom avatar is provided, show it instead of SVG
+  if (customAvatar) {
+    return (
+      <div className="w-full h-full max-w-[80vh] max-h-[80vh] flex items-center justify-center">
+        <img
+          src={customAvatar}
+          alt="Kratos Avatar"
+          className="w-full h-full object-contain rounded-full"
+          style={{
+            boxShadow: `0 0 40px ${theme?.primary || '#3b82f6'}40`,
+          }}
+        />
+      </div>
+    );
+  }
 
   // Dynamic styles based on state
   const faceColor = useMemo(() => {

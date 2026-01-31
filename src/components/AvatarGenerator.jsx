@@ -38,6 +38,8 @@ export function AvatarGenerator({ onAvatarGenerated, theme }) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      // Notify parent to switch to this avatar
+      onAvatarGenerated?.({ url: previewUrl, useAsFace: true });
     }
   };
 
