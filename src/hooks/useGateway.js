@@ -19,7 +19,12 @@ export function useGateway(config) {
   const reconnectTimeoutRef = useRef(null);
 
   const connect = useCallback(() => {
-    if (!config?.gateway?.url) return;
+    if (!config?.gateway?.url) {
+      // No gateway configured - standalone mode
+      setState(STATES.IDLE);
+      setMessage('');
+      return;
+    }
 
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
@@ -27,8 +32,9 @@ export function useGateway(config) {
     const wsUrl = params.get('ws') || config.gateway.url;
 
     if (!token) {
-      setState(STATES.ERROR);
-      setMessage('Missing token. Add ?token=YOUR_TOKEN to URL');
+      // Standalone mode - no gateway connection, just display face
+      setState(STATES.IDLE);
+      setMessage('');
       return;
     }
 
