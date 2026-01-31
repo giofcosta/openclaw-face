@@ -1,0 +1,25 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Deploy to staging server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/clawd/moltbot-face
+            git fetch origin
+            git checkout develop
+            git pull origin develop
+            npm ci
+            npm run build:staging
+            pm2 restart moltbot-face-staging || pm2 start npm --name "moltbot-face-staging" -- run start:staging
