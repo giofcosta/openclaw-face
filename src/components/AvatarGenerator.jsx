@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { generateKratosAvatar, DEFAULT_PROMPTS } from '../lib/avatarGenerator';
 import { buttonVariants, cn } from '../lib/utils';
+import { Toast, useToast } from './Toast';
 
 const STORAGE_KEY = 'kratos-custom-avatar';
 
@@ -42,6 +43,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   const [selectedStyle, setSelectedStyle] = useState('kratos');
   const [history, setHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('generate');
+  const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}-history`);
@@ -91,6 +93,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   const handleUse = (url) => {
     localStorage.setItem(STORAGE_KEY, url);
     onAvatarGenerated?.({ url, useAsFace: true });
+    showToast('Avatar set successfully!', 'success');
   };
 
   const handleDownload = async (url) => {
@@ -118,6 +121,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   if (!isOpen) return null;
 
   return (
+    <>
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div
         className="w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
@@ -359,6 +363,18 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
       </div>
     </div>
+    
+    {/* Toast notification */}
+    {toast && (
+      <Toast
+        key={toast.key}
+        message={toast.message}
+        type={toast.type}
+        duration={toast.duration}
+        onClose={hideToast}
+      />
+    )}
+    </>
   );
 }
 
