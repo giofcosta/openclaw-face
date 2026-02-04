@@ -1,0 +1,39 @@
+name: Auto-move Project Cards
+
+on:
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  move-card:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move to PR opened
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const match = body.match(/(?:closes?|fixes?|resolves?)\\s*#(\\d+)/i);
+            if (!match) {
+              console.log('No linked issue found');
+              return;
+            }
+            const issueNumber = parseInt(match[1]);
+            console.log(`Linked issue: #${issueNumber}`);
+            // Move to PR opened logic here
+
+      - name: Move to Done
+        if: github.event.action == 'closed' && github.event.pull_request.merged == true
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const match = body.match(/(?:closes?|fixes?|resolves?)\\s*#(\\d+)/i);
+            if (!match) {
+              console.log('No linked issue found');
+              return;
+            }
+            console.log('Moving to Done...');
