@@ -2,22 +2,16 @@ import { useState, useEffect } from 'react';
 import { Face } from './components/Face';
 import { StatusBar } from './components/StatusBar';
 import { ChatBubble } from './components/ChatBubble';
-import { AvatarGenerator, loadSavedAvatar } from './components/AvatarGenerator';
 import { useGateway } from './hooks/useGateway';
 
 function App() {
   const [config, setConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAvatarGenerator, setShowAvatarGenerator] = useState(false);
-  const [customAvatar, setCustomAvatar] = useState(() => loadSavedAvatar());
 
-  // Load config on mount based on environment
+  // Load config on mount
   useEffect(() => {
-    const env = import.meta.env.VITE_ENV || 'production';
-    const configFile = env === 'staging' ? '/config.staging.json' : '/config.production.json';
-    
-    fetch(configFile)
+    fetch('/config.json')
       .then(res => res.json())
       .then(data => {
         setConfig(data);
@@ -77,7 +71,7 @@ function App() {
 
   return (
     <div 
-      className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden p-6 sm:p-8 lg:p-12"
+      className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden"
       style={{ background: config?.theme?.background || '#0f172a' }}
     >
       {/* Status bar */}
@@ -95,7 +89,6 @@ function App() {
           state={state}
           config={config}
           theme={config?.theme}
-          customAvatar={customAvatar}
         />
       </div>
 
@@ -106,43 +99,10 @@ function App() {
         theme={config?.theme}
       />
 
-      {/* Bottom controls */}
-      <div className="absolute bottom-0 left-0 right-0 px-2 sm:px-4 flex items-center justify-between">
-        {/* Avatar Generator Toggle */}
-        <button
-          onClick={() => setShowAvatarGenerator(!showAvatarGenerator)}
-          className="text-sm px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
-          style={{ color: config?.theme?.text || '#fff' }}
-        >
-          <span>⚡</span>
-          <span>{showAvatarGenerator ? 'Back to Face' : 'Generate Avatar'}</span>
-        </button>
-
-        {/* Environment badge + Fullscreen hint */}
-        <div className="flex items-center gap-4 text-xs" style={{ color: config?.theme?.text || '#fff' }}>
-          {config?.environment === 'staging' && (
-            <span className="bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-full font-medium">STAGING</span>
-          )}
-          <span className="opacity-40">Press F11 for fullscreen</span>
-        </div>
+      {/* Fullscreen hint */}
+      <div className="absolute bottom-2 right-4 text-xs opacity-30" style={{ color: config?.theme?.text || '#fff' }}>
+        Press F11 for fullscreen
       </div>
-
-      {/* Avatar Generator Panel */}
-      <AvatarGenerator
-        isOpen={showAvatarGenerator}
-        onClose={() => setShowAvatarGenerator(false)}
-        theme={config?.theme}
-        hasCustomAvatar={!!customAvatar}
-        onAvatarGenerated={(result) => {
-          console.log('Avatar generated:', result);
-          if (result?.useAsFace) {
-            setCustomAvatar(result.url);
-          }
-        }}
-        onResetToDefault={() => {
-          setCustomAvatar(null);
-        }}
-      />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { generateKratosAvatar, DEFAULT_PROMPTS } from '../lib/avatarGenerator';
 import { buttonVariants, cn } from '../lib/utils';
-import { Toast, useToast } from './Toast';
 
 const STORAGE_KEY = 'kratos-custom-avatar';
 
@@ -36,20 +35,13 @@ const styles = [
   },
 ];
 
-export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onResetToDefault, hasCustomAvatar }) {
+export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [selectedStyle, setSelectedStyle] = useState('kratos');
   const [history, setHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('generate');
-  const { toast, showToast, hideToast } = useToast();
-
-  const handleResetToDefault = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    onResetToDefault?.();
-    showToast('Switched to CSS face!', 'success');
-  };
 
   useEffect(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}-history`);
@@ -99,7 +91,6 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
   const handleUse = (url) => {
     localStorage.setItem(STORAGE_KEY, url);
     onAvatarGenerated?.({ url, useAsFace: true });
-    showToast('Avatar set successfully!', 'success');
   };
 
   const handleDownload = async (url) => {
@@ -127,8 +118,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
   if (!isOpen) return null;
 
   return (
-    <>
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         className="w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
         style={{
@@ -137,7 +127,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-5 border-b border-white/10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
@@ -150,26 +140,16 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
               <p className="text-sm text-white/50">Generate your Kratos avatar</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {hasCustomAvatar && (
-              <button
-                onClick={handleResetToDefault}
-                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'text-white/70 hover:text-white')}
-              >
-                Use CSS Face
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'text-white/70 hover:text-white')}
-            >
-              ✕
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'text-white/70 hover:text-white')}
+          >
+            ✕
+          </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex px-4 sm:px-6 lg:px-8 border-b border-white/10">
+        <div className="flex px-6 border-b border-white/10">
           {['generate', 'history'].map((tab) => (
             <button
               key={tab}
@@ -196,7 +176,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="flex-1 overflow-y-auto p-6">
           {activeTab === 'generate' ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Style Selection */}
@@ -204,13 +184,13 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
                 <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
                   Choose Style
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {styles.map((style) => (
                     <button
                       key={style.id}
                       onClick={() => setSelectedStyle(style.id)}
                       className={cn(
-                        'relative p-5 rounded-xl border-2 text-left transition-all group',
+                        'relative p-4 rounded-xl border-2 text-left transition-all group',
                         selectedStyle === style.id
                           ? 'border-primary bg-primary/10'
                           : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
@@ -247,7 +227,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
                   disabled={loading}
                   className={cn(
                     buttonVariants({ size: 'lg' }),
-                    'w-full sm:w-auto sm:min-w-[200px] mt-4',
+                    'w-full mt-4',
                     loading && 'opacity-70 cursor-not-allowed'
                   )}
                   style={{ background: theme?.primary }}
@@ -278,7 +258,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
                 </button>
 
                 {error && (
-                  <div className="p-5 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
+                  <div className="p-4 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
                     {error}
                   </div>
                 )}
@@ -289,7 +269,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
                 <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
                   Preview
                 </h3>
-                <div className="flex-1 flex items-center justify-center min-h-[280px] sm:min-h-[300px] rounded-xl bg-white/5 border border-white/10 p-4 sm:p-6 lg:p-10">
+                <div className="flex-1 flex items-center justify-center min-h-[300px] rounded-xl bg-white/5 border border-white/10 p-8">
                   {previewUrl ? (
                     <div className="w-full max-w-sm space-y-4">
                       <div
@@ -302,17 +282,17 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <div className="flex gap-3">
                         <button
                           onClick={() => handleUse(previewUrl)}
-                          className={cn(buttonVariants(), 'sm:min-w-[140px]')}
+                          className={cn(buttonVariants(), 'flex-1')}
                           style={{ background: theme?.primary }}
                         >
                           Use as Face
                         </button>
                         <button
                           onClick={() => handleDownload(previewUrl)}
-                          className={cn(buttonVariants({ variant: 'outline' }), 'sm:min-w-[140px]')}
+                          className={cn(buttonVariants({ variant: 'outline' }), 'flex-1')}
                         >
                           Download
                         </button>
@@ -328,9 +308,9 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {history.length === 0 ? (
-                <div className="col-span-full text-center py-16 px-8 text-white/40">
+                <div className="col-span-full text-center py-16 text-white/40">
                   <div className="text-5xl mb-4">📷</div>
                   <p>No avatars yet. Generate your first!</p>
                 </div>
@@ -374,23 +354,11 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
         </div>
 
         {/* Footer */}
-        <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-t border-white/10 text-center text-xs text-white/40">
+        <div className="px-6 py-3 border-t border-white/10 text-center text-xs text-white/40">
           Powered by Pollinations.ai • Free unlimited generation
         </div>
       </div>
     </div>
-    
-    {/* Toast notification */}
-    {toast && (
-      <Toast
-        key={toast.key}
-        message={toast.message}
-        type={toast.type}
-        duration={toast.duration}
-        onClose={hideToast}
-      />
-    )}
-    </>
   );
 }
 
