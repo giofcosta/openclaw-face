@@ -52,19 +52,13 @@ export function Face({ state, config, theme, customAvatar }) {
               className="w-full h-full object-cover"
             />
             {/* Glow ring */}
-            <div 
+            <div
               className="absolute inset-0 rounded-full pointer-events-none"
               style={{
                 boxShadow: `inset 0 0 30px ${theme?.primary || '#3b82f6'}40`,
               }}
             />
           </div>
-          {/* Mood indicator dot */}
-          <div 
-            className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-white"
-            style={{ backgroundColor: moodColor }}
-            title={`Mood: ${mood}`}
-          />
         </div>
       </div>
     );
@@ -93,12 +87,6 @@ export function Face({ state, config, theme, customAvatar }) {
           boxShadow: `0 0 60px ${moodColor}50, 0 0 100px ${moodColor}30`,
           transform: 'scale(1.1)',
         }}
-      />
-      {/* Mood indicator dot */}
-      <div 
-        className="absolute bottom-4 right-4 w-5 h-5 rounded-full border-2 border-white z-10"
-        style={{ backgroundColor: moodColor }}
-        title={`Mood: ${mood}`}
       />
       <svg
         viewBox="0 0 400 400"
