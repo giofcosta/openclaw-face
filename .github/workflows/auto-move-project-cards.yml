@@ -16,13 +16,81 @@ jobs:
           script: |
             const body = context.payload.pull_request.body || '';
             const match = body.match(/(?:closes?|fixes?|resolves?)\\s*#(\\d+)/i);
+            
             if (!match) {
-              console.log('No linked issue found');
+              console.log('No linked issue found in PR body');
               return;
             }
+            
             const issueNumber = parseInt(match[1]);
-            console.log(`Linked issue: #${issueNumber}`);
-            // Move to PR opened logic here
+            console.log(`Found linked issue: #${issueNumber}`);
+            
+            const { data: { repository: { issue } } } = await github.graphql(`
+              query($owner: String!, $repo: String!, $issueNumber: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  issue(number: $issueNumber) {
+                    id
+                    projectItems(first: 10) {
+                      nodes {
+                        id
+                        project { id }
+                      }
+                    }
+                  }
+                }
+              }
+            `, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issueNumber
+            });
+            
+            if (!issue?.projectItems?.nodes?.length) {
+              console.log('Issue not found or not in project');
+              return;
+            }
+            
+            const projectItem = issue.projectItems.nodes[0];
+            const { data: { node: { field: statusField } } } = await github.graphql(`
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    field(name: "Status") {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        options { id name }
+                      }
+                    }
+                  }
+                }
+              }
+            `, { projectId: projectItem.project.id });
+            
+            const prOpenedOption = statusField.options.find(o => o.name === 'PR opened');
+            if (!prOpenedOption) {
+              console.log('PR opened column not found');
+              return;
+            }
+            
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { singleSelectOptionId: $optionId }
+                  }
+                ) { projectV2Item { id } }
+              }
+            `, {
+              projectId: projectItem.project.id,
+              itemId: projectItem.id,
+              fieldId: statusField.id,
+              optionId: prOpenedOption.id
+            });
+            
+            console.log(`Moved issue #${issueNumber} to "PR opened"`);
 
       - name: Move to Done
         if: github.event.action == 'closed' && github.event.pull_request.merged == true
@@ -32,8 +100,78 @@ jobs:
           script: |
             const body = context.payload.pull_request.body || '';
             const match = body.match(/(?:closes?|fixes?|resolves?)\\s*#(\\d+)/i);
+            
             if (!match) {
-              console.log('No linked issue found');
+              console.log('No linked issue found in PR body');
               return;
             }
-            console.log('Moving to Done...');
+            
+            const issueNumber = parseInt(match[1]);
+            console.log(`Found linked issue: #${issueNumber}`);
+            
+            const { data: { repository: { issue } } } = await github.graphql(`
+              query($owner: String!, $repo: String!, $issueNumber: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  issue(number: $issueNumber) {
+                    id
+                    projectItems(first: 10) {
+                      nodes {
+                        id
+                        project { id }
+                      }
+                    }
+                  }
+                }
+              }
+            `, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issueNumber
+            });
+            
+            if (!issue?.projectItems?.nodes?.length) {
+              console.log('Issue not found or not in project');
+              return;
+            }
+            
+            const projectItem = issue.projectItems.nodes[0];
+            const { data: { node: { field: statusField } } } = await github.graphql(`
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    field(name: "Status") {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        options { id name }
+                      }
+                    }
+                  }
+                }
+              }
+            `, { projectId: projectItem.project.id });
+            
+            const doneOption = statusField.options.find(o => o.name === 'Done');
+            if (!doneOption) {
+              console.log('Done column not found');
+              return;
+            }
+            
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { singleSelectOptionId: $optionId }
+                  }
+                ) { projectV2Item { id } }
+              }
+            `, {
+              projectId: projectItem.project.id,
+              itemId: projectItem.id,
+              fieldId: statusField.id,
+              optionId: doneOption.id
+            });
+            
+            console.log(`Moved issue #${issueNumber} to "Done"`);
