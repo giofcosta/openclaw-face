@@ -1,13 +1,68 @@
 import { useMemo } from 'react';
 import { STATES } from '../hooks/useGateway';
+import { useMood, MOODS } from '../hooks/useMood';
 
-export function Face({ state, config, theme }) {
+export function Face({ state, config, theme, customAvatar }) {
   const isThinking = state === STATES.THINKING;
   const isSpeaking = state === STATES.SPEAKING;
   const isError = state === STATES.ERROR;
   const isDisconnected = state === STATES.DISCONNECTED || state === STATES.CONNECTING;
+  
+  // Get mood from local memory
+  const { mood } = useMood(state);
+
+  // Mood colors
+  const moodColor = useMemo(() => {
+    switch (mood) {
+      case MOODS.HAPPY:
+        return '#22c55e'; // Green
+      case MOODS.ANGRY:
+        return '#ef4444'; // Red
+      case MOODS.NEUTRAL:
+      default:
+        return '#eab308'; // Yellow
+    }
+  }, [mood]);
 
   const eyeStyle = config?.face?.eyeShape || 'angular';
+
+  // If custom avatar is provided, show it instead of SVG
+  if (customAvatar) {
+    return (
+      <div className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8">
+        <div className="relative">
+          {/* Mood halo */}
+          <div 
+            className="absolute -inset-4 rounded-full animate-pulse"
+            style={{
+              background: `radial-gradient(circle, ${moodColor}40 0%, ${moodColor}20 40%, transparent 70%)`,
+              boxShadow: `0 0 40px ${moodColor}60, 0 0 80px ${moodColor}40`,
+            }}
+          />
+          <div 
+            className="relative w-full aspect-square rounded-full overflow-hidden"
+            style={{
+              boxShadow: `0 0 60px ${theme?.primary || '#3b82f6'}60, inset 0 0 60px ${theme?.primary || '#3b82f6'}20`,
+              border: `3px solid ${theme?.primary || '#3b82f6'}80`,
+            }}
+          >
+            <img
+              src={customAvatar}
+              alt="Kratos Avatar"
+              className="w-full h-full object-cover"
+            />
+            {/* Glow ring */}
+            <div
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{
+                boxShadow: `inset 0 0 30px ${theme?.primary || '#3b82f6'}40`,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Dynamic styles based on state
   const faceColor = useMemo(() => {
@@ -23,15 +78,25 @@ export function Face({ state, config, theme }) {
   }, [isThinking, isSpeaking]);
 
   return (
-    <svg
-      viewBox="0 0 400 400"
-      className={`w-full h-full max-w-[80vh] max-h-[80vh] transition-all duration-300 ${
-        isThinking ? 'animate-thinking' : ''
-      }`}
-      style={{
-        filter: `drop-shadow(${glowIntensity} ${faceColor}40)`,
-      }}
-    >
+    <div className="relative">
+      {/* Mood halo for SVG face */}
+      <div 
+        className="absolute inset-0 rounded-full animate-pulse pointer-events-none"
+        style={{
+          background: `radial-gradient(circle, ${moodColor}30 0%, ${moodColor}15 40%, transparent 70%)`,
+          boxShadow: `0 0 60px ${moodColor}50, 0 0 100px ${moodColor}30`,
+          transform: 'scale(1.1)',
+        }}
+      />
+      <svg
+        viewBox="0 0 400 400"
+        className={`w-full h-full max-w-[80vh] max-h-[80vh] transition-all duration-300 relative z-0 ${
+          isThinking ? 'animate-thinking' : ''
+        }`}
+        style={{
+          filter: `drop-shadow(${glowIntensity} ${faceColor}40)`,
+        }}
+      >
       {/* Background circle */}
       <circle
         cx="200"
@@ -135,7 +200,6 @@ export function Face({ state, config, theme }) {
                 rx="3"
                 fill={faceColor}
                 style={{
-                  animationDelay: `${i * 0.1}s`,
                   animation: `speaking-wave 0.3s ease-in-out infinite`,
                   animationDelay: `${i * 0.05}s`,
                 }}
@@ -197,5 +261,6 @@ export function Face({ state, config, theme }) {
         }}
       />
     </svg>
+    </div>
   );
 }
