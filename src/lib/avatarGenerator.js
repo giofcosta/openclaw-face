@@ -28,59 +28,16 @@ export async function generateAvatar(prompt, options = {}) {
 
   const imageUrl = `${POLLINATIONS_URL}${encodedPrompt}?${params}`;
 
-  try {
-    // Add timeout to prevent hanging requests
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-    
-    const response = await fetch(imageUrl, {
-      signal: controller.signal,
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to generate image: ${response.status} ${response.statusText}`);
-    }
-
-    // Verify we got an image
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.startsWith('image/')) {
-      throw new Error(`Invalid response type: ${contentType}. Expected image.`);
-    }
-
-    // Return as blob or convert to base64
-    const blob = await response.blob();
-    
-    // Verify blob is not empty
-    if (blob.size === 0) {
-      throw new Error('Generated image is empty');
-    }
-    
-    return {
-      success: true,
-      url: imageUrl,
-      blob,
-      seed,
-      prompt,
-    };
-  } catch (error) {
-    console.error('Avatar generation error:', error);
-    
-    // Provide user-friendly error messages
-    let errorMessage = error.message;
-    if (error.name === 'AbortError') {
-      errorMessage = 'Request timed out. The image generation is taking too long. Please try again.';
-    } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-      errorMessage = 'Network error. Please check your connection and try again.';
-    }
-    
-    return {
-      success: false,
-      error: errorMessage,
-      prompt,
-    };
-  }
+  // Note: We don't fetch the image here to avoid CORS issues.
+  // The image URL is returned directly and loaded via <img> tag in the component.
+  // Pollinations.ai supports direct image loading without CORS restrictions.
+  
+  return {
+    success: true,
+    url: imageUrl,
+    seed,
+    prompt,
+  };
 }
 
 // Default prompts for Kratos avatar
