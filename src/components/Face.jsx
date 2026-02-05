@@ -31,12 +31,13 @@ export function Face({ state, config, theme, customAvatar }) {
     return (
       <div className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8">
         <div className="relative">
-          {/* Mood halo */}
-          <div 
-            className="absolute -inset-4 rounded-full animate-pulse"
+          {/* Mood halo with breathing animation */}
+          <div
+            className="absolute -inset-4 rounded-full pointer-events-none"
             style={{
               background: `radial-gradient(circle, ${moodColor}40 0%, ${moodColor}20 40%, transparent 70%)`,
               boxShadow: `0 0 40px ${moodColor}60, 0 0 80px ${moodColor}40`,
+              animation: `breathe ${breathingSpeed} ease-in-out infinite`,
             }}
           />
           <div 
@@ -64,6 +65,13 @@ export function Face({ state, config, theme, customAvatar }) {
     );
   }
 
+  // Breathing animation speed based on state
+  const breathingSpeed = useMemo(() => {
+    if (isThinking || isSpeaking) return '0.8s'; // Fast when active
+    if (state === STATES.LISTENING) return '2s'; // Medium when listening
+    return '4s'; // Slow when idle
+  }, [isThinking, isSpeaking, state]);
+
   // Dynamic styles based on state
   const faceColor = useMemo(() => {
     if (isError) return '#ef4444';
@@ -79,13 +87,14 @@ export function Face({ state, config, theme, customAvatar }) {
 
   return (
     <div className="relative">
-      {/* Mood halo for SVG face */}
-      <div 
-        className="absolute inset-0 rounded-full animate-pulse pointer-events-none"
+      {/* Mood halo for SVG face with breathing animation */}
+      <div
+        className="absolute inset-0 rounded-full pointer-events-none"
         style={{
           background: `radial-gradient(circle, ${moodColor}30 0%, ${moodColor}15 40%, transparent 70%)`,
           boxShadow: `0 0 60px ${moodColor}50, 0 0 100px ${moodColor}30`,
           transform: 'scale(1.1)',
+          animation: `breathe ${breathingSpeed} ease-in-out infinite`,
         }}
       />
       <svg
