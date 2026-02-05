@@ -40,6 +40,8 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState('kratos');
   const [history, setHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('generate');
@@ -70,6 +72,8 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
     setLoading(true);
     setError(null);
     setPreviewUrl(null);
+    setImageLoading(true);
+    setImageError(false);
 
     try {
       const result = await generateKratosAvatar(selectedStyle, {
@@ -88,9 +92,11 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
         setHistory((prev) => [newItem, ...prev].slice(0, 12));
       } else {
         setError(result.error);
+        setImageLoading(false);
       }
     } catch (err) {
       setError(err.message);
+      setImageLoading(false);
     } finally {
       setLoading(false);
     }
@@ -293,13 +299,32 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
                   {previewUrl ? (
                     <div className="w-full max-w-sm space-y-4">
                       <div
-                        className="aspect-square rounded-2xl overflow-hidden ring-2 ring-offset-4 ring-offset-[#0f172a]"
+                        className="aspect-square rounded-2xl overflow-hidden ring-2 ring-offset-4 ring-offset-[#0f172a] relative"
                         style={{ ringColor: theme?.primary }}
                       >
+                        {imageLoading && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-white/5">
+                            <div className="animate-spin h-8 w-8 border-2 border-white/30 border-t-white rounded-full" />
+                          </div>
+                        )}
+                        {imageError && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-red-500/10">
+                            <div className="text-center text-red-400 p-4">
+                              <div className="text-3xl mb-2">⚠️</div>
+                              <p className="text-sm">Failed to load image</p>
+                            </div>
+                          </div>
+                        )}
                         <img
                           src={previewUrl}
                           alt="Generated"
-                          className="w-full h-full object-cover"
+                          className={`w-full h-full object-cover ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                          onLoad={() => setImageLoading(false)}
+                          onError={() => {
+                            setImageLoading(false);
+                            setImageError(true);
+                            setError('Failed to load generated image. Please try again.');
+                          }}
                         />
                       </div>
                       <div className="flex flex-col sm:flex-row gap-3 justify-center">
