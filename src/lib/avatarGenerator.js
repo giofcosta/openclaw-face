@@ -1,11 +1,42 @@
 /**
  * Avatar Generation API
  * Uses Pollinations.ai (free, no API key required)
+ * With fallback models for reliability
  */
 
 const POLLINATIONS_URL = 'https://image.pollinations.ai/prompt/';
 
-export async function generateAvatar(prompt, options = {}) {
+// Models to try in order of preference
+const FALLBACK_MODELS = ['flux', 'turbo'];
+
+/**
+ * Check if an image URL is valid by making a HEAD request
+ */
+async function validateImageUrl(url, timeout = 10000) {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    const response = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+    
+    // Check if response is an image
+    const contentType = response.headers.get('content-type');
+    return response.ok && contentType?.startsWith('image/');
+  } catch (error) {
+    console.warn('Image validation failed:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Build Pollinations URL with parameters
+ */
+function buildImageUrl(prompt, options, model = null) {
   const {
     width = 512,
     height = 512,
@@ -14,10 +45,8 @@ export async function generateAvatar(prompt, options = {}) {
     enhance = true,
   } = options;
 
-  // Encode prompt for URL
   const encodedPrompt = encodeURIComponent(prompt);
   
-  // Build URL with parameters
   const params = new URLSearchParams({
     width: width.toString(),
     height: height.toString(),
@@ -25,16 +54,45 @@ export async function generateAvatar(prompt, options = {}) {
     nologo: nologo.toString(),
     enhance: enhance.toString(),
   });
-
-  const imageUrl = `${POLLINATIONS_URL}${encodedPrompt}?${params}`;
-
-  // Note: We don't fetch the image here to avoid CORS issues.
-  // The image URL is returned directly and loaded via <img> tag in the component.
-  // Pollinations.ai supports direct image loading without CORS restrictions.
   
+  if (model) {
+    params.set('model', model);
+  }
+
+  return `${POLLINATIONS_URL}${encodedPrompt}?${params}`;
+}
+
+export async function generateAvatar(prompt, options = {}) {
+  const seed = options.seed || Math.floor(Math.random() * 1000000);
+  const optionsWithSeed = { ...options, seed };
+  
+  // Try each model in sequence until one works
+  for (const model of FALLBACK_MODELS) {
+    const imageUrl = buildImageUrl(prompt, optionsWithSeed, model);
+    
+    console.log(`Trying model: ${model}`);
+    
+    const isValid = await validateImageUrl(imageUrl);
+    
+    if (isValid) {
+      console.log(`Success with model: ${model}`);
+      return {
+        success: true,
+        url: imageUrl,
+        seed,
+        prompt,
+        model,
+      };
+    }
+    
+    console.warn(`Model ${model} failed, trying next...`);
+  }
+  
+  // All models failed
+  console.error('All Pollinations models failed');
   return {
-    success: true,
-    url: imageUrl,
+    success: false,
+    error: 'All image generation models are currently unavailable. Please try again later.',
     seed,
     prompt,
   };
