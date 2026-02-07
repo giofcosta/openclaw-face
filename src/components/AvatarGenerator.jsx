@@ -40,6 +40,8 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [fallbackUrl, setFallbackUrl] = useState(null);
+  const [usedFallback, setUsedFallback] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState('kratos');
@@ -72,6 +74,8 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
     setLoading(true);
     setError(null);
     setPreviewUrl(null);
+    setFallbackUrl(null);
+    setUsedFallback(false);
     setImageLoading(true);
     setImageError(false);
 
@@ -83,6 +87,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
 
       if (result.success) {
         setPreviewUrl(result.url);
+        setFallbackUrl(result.fallbackUrl || null);
         const newItem = {
           url: result.url,
           style: selectedStyle,
@@ -319,11 +324,33 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
                           src={previewUrl}
                           alt="Generated"
                           className={`w-full h-full object-cover ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                          onLoad={() => setImageLoading(false)}
+                          onLoad={() => {
+                            setImageLoading(false);
+                            // Update history with working URL if we used fallback
+                            if (usedFallback) {
+                              setHistory((prev) => {
+                                if (prev.length > 0) {
+                                  const updated = [...prev];
+                                  updated[0] = { ...updated[0], url: previewUrl };
+                                  return updated;
+                                }
+                                return prev;
+                              });
+                            }
+                          }}
                           onError={() => {
+                            // If we have a fallback and haven't tried it yet, use it
+                            if (fallbackUrl && !usedFallback) {
+                              console.log('Primary image failed, trying fallback:', fallbackUrl);
+                              setPreviewUrl(fallbackUrl);
+                              setUsedFallback(true);
+                              showToast('Using fallback avatar', 'info');
+                              return;
+                            }
+                            // Fallback also failed or no fallback available
                             setImageLoading(false);
                             setImageError(true);
-                            setError('Failed to load generated image. Please try again.');
+                            setError('Failed to load image. Please try again.');
                           }}
                         />
                       </div>
