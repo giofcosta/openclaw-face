@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { STATES } from '../hooks/useGateway';
 import { useMood, MOODS } from '../hooks/useMood';
+import { ParticleSystem } from './ParticleSystem';
 
 export function Face({ state, config, theme, customAvatar }) {
   const isThinking = state === STATES.THINKING;
@@ -36,8 +37,14 @@ export function Face({ state, config, theme, customAvatar }) {
   // If custom avatar is provided, show it instead of SVG
   if (customAvatar) {
     return (
-      <div className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8">
-        <div className="relative">
+      <div className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8 relative">
+        {/* Particle System */}
+        <ParticleSystem 
+          state={state} 
+          theme={theme} 
+          enabled={config?.animations?.particles !== false}
+        />
+        <div className="relative z-10">
           {/* Mood halo with breathing animation */}
           <div
             className="absolute -inset-4 rounded-full pointer-events-none"
@@ -87,9 +94,15 @@ export function Face({ state, config, theme, customAvatar }) {
 
   return (
     <div className="relative">
+      {/* Particle System */}
+      <ParticleSystem 
+        state={state} 
+        theme={theme} 
+        enabled={config?.animations?.particles !== false}
+      />
       {/* Mood halo for SVG face with breathing animation */}
       <div
-        className="absolute inset-0 rounded-full pointer-events-none"
+        className="absolute inset-0 rounded-full pointer-events-none z-10"
         style={{
           background: `radial-gradient(circle, ${moodColor}30 0%, ${moodColor}15 40%, transparent 70%)`,
           boxShadow: `0 0 60px ${moodColor}50, 0 0 100px ${moodColor}30`,
