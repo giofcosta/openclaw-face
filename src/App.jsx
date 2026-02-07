@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Face } from './components/Face';
 import { StatusBar } from './components/StatusBar';
 import { ChatBubble } from './components/ChatBubble';
 import { AvatarGenerator, loadSavedAvatar } from './components/AvatarGenerator';
+import { ThemeSelector } from './components/ThemeSelector';
 import { useGateway } from './hooks/useGateway';
+import { getTheme, loadThemePreference, saveThemePreference } from './lib/themePresets';
 
 function App() {
   const [config, setConfig] = useState(null);
@@ -11,6 +13,23 @@ function App() {
   const [error, setError] = useState(null);
   const [showAvatarGenerator, setShowAvatarGenerator] = useState(false);
   const [customAvatar, setCustomAvatar] = useState(() => loadSavedAvatar());
+  const [themeKey, setThemeKey] = useState(() => loadThemePreference());
+
+  // Get active theme (preset or from config)
+  const activeTheme = useMemo(() => {
+    const preset = getTheme(themeKey);
+    // Merge with any config overrides
+    return { ...preset, ...config?.theme };
+  }, [themeKey, config?.theme]);
+
+  // Handle theme change
+  const handleThemeChange = (key) => {
+    setThemeKey(key);
+    saveThemePreference(key);
+    // Apply to document
+    const theme = getTheme(key);
+    document.body.style.background = theme.background;
+  };
 
   // Load config on mount based on environment
   useEffect(() => {
@@ -21,16 +40,14 @@ function App() {
       .then(res => res.json())
       .then(data => {
         setConfig(data);
-        // Apply theme CSS variables
-        if (data.theme) {
-          const root = document.documentElement;
-          root.style.setProperty('--face-primary', data.theme.primary);
-          root.style.setProperty('--face-secondary', data.theme.secondary);
-          root.style.setProperty('--face-accent', data.theme.accent);
-          root.style.setProperty('--face-bg', data.theme.background);
-          root.style.setProperty('--face-glow', data.theme.glow);
-          document.body.style.background = data.theme.background;
-        }
+        // Apply initial theme from preset
+        const savedTheme = loadThemePreference();
+        const theme = getTheme(savedTheme);
+        const root = document.documentElement;
+        root.style.setProperty('--face-primary', theme.primary);
+        root.style.setProperty('--face-accent', theme.accent);
+        root.style.setProperty('--face-bg', theme.background);
+        document.body.style.background = theme.background;
         setLoading(false);
       })
       .catch(err => {
@@ -78,15 +95,23 @@ function App() {
   return (
     <div 
       className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden p-6 sm:p-8 lg:p-12"
-      style={{ background: config?.theme?.background || '#0f172a' }}
+      style={{ background: activeTheme.background }}
     >
+      {/* Theme Selector - Top Right */}
+      <div className="absolute top-4 right-4 z-30">
+        <ThemeSelector 
+          currentTheme={themeKey} 
+          onThemeChange={handleThemeChange} 
+        />
+      </div>
+
       {/* Status bar */}
       <StatusBar
         state={state}
         identity={config?.identity}
         message={message}
         visible={config?.face?.showStatus !== false}
-        theme={config?.theme}
+        theme={activeTheme}
       />
 
       {/* Main face */}
@@ -94,7 +119,7 @@ function App() {
         <Face
           state={state}
           config={config}
-          theme={config?.theme}
+          theme={activeTheme}
           customAvatar={customAvatar}
         />
       </div>
@@ -103,7 +128,7 @@ function App() {
       <ChatBubble
         message={lastResponse}
         visible={config?.face?.showBubble !== false && (state === STATES.SPEAKING || lastResponse)}
-        theme={config?.theme}
+        theme={activeTheme}
       />
 
       {/* Bottom controls */}
@@ -112,14 +137,14 @@ function App() {
         <button
           onClick={() => setShowAvatarGenerator(!showAvatarGenerator)}
           className="text-sm px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
-          style={{ color: config?.theme?.text || '#fff' }}
+          style={{ color: activeTheme.text }}
         >
           <span>⚡</span>
           <span>{showAvatarGenerator ? 'Back to Face' : 'Generate Avatar'}</span>
         </button>
 
         {/* Environment badge + Fullscreen hint */}
-        <div className="flex items-center gap-4 text-xs" style={{ color: config?.theme?.text || '#fff' }}>
+        <div className="flex items-center gap-4 text-xs" style={{ color: activeTheme.text }}>
           {config?.environment === 'staging' && (
             <span className="bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-full font-medium">STAGING</span>
           )}
@@ -131,7 +156,7 @@ function App() {
       <AvatarGenerator
         isOpen={showAvatarGenerator}
         onClose={() => setShowAvatarGenerator(false)}
-        theme={config?.theme}
+        theme={activeTheme}
         hasCustomAvatar={!!customAvatar}
         onAvatarGenerated={(result) => {
           console.log('Avatar generated:', result);
