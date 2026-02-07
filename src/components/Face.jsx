@@ -1,14 +1,21 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { STATES } from '../hooks/useGateway';
 import { useMood, MOODS } from '../hooks/useMood';
 import { WeatherAtmosphere } from './WeatherAtmosphere';
+import { useMouseTracking, calculateEyeOffset } from '../hooks/useMouseTracking';
 
 export function Face({ state, config, theme, customAvatar }) {
+  const containerRef = useRef(null);
   const isThinking = state === STATES.THINKING;
   const isSpeaking = state === STATES.SPEAKING;
   const isError = state === STATES.ERROR;
   const isDisconnected = state === STATES.DISCONNECTED || state === STATES.CONNECTING;
   
+  // Eye tracking - eyes follow mouse cursor
+  const eyeTrackingEnabled = config?.animations?.eyeTracking !== false;
+  const { position: mousePosition } = useMouseTracking(containerRef, eyeTrackingEnabled);
+  const eyeOffset = calculateEyeOffset(mousePosition, 5); // Max 5px offset
+
   // Get mood from local memory
   const { mood } = useMood(state);
 
@@ -37,7 +44,7 @@ export function Face({ state, config, theme, customAvatar }) {
   // If custom avatar is provided, show it instead of SVG
   if (customAvatar) {
     return (
-      <div className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8 relative">
+      <div ref={containerRef} className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8 relative">
         {/* Weather Atmosphere */}
         <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
         <div className="relative z-10">
@@ -89,7 +96,7 @@ export function Face({ state, config, theme, customAvatar }) {
   }, [isThinking, isSpeaking]);
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       {/* Weather Atmosphere */}
       <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
       {/* Mood halo for SVG face with breathing animation */}
@@ -145,14 +152,15 @@ export function Face({ state, config, theme, customAvatar }) {
               className="transition-all duration-300"
               style={{ opacity: isDisconnected ? 0.3 : 1 }}
             />
-            {/* Eye glow */}
+            {/* Eye glow/pupil - follows mouse */}
             <ellipse
-              cx="140"
-              cy="160"
+              cx={140 + eyeOffset.offsetX}
+              cy={160 + eyeOffset.offsetY}
               rx="8"
               ry="6"
               fill={theme?.accent || '#fbbf24'}
               className={isSpeaking ? 'animate-speaking' : ''}
+              style={{ transition: 'cx 0.05s, cy 0.05s' }}
             />
           </>
         ) : (
@@ -177,14 +185,15 @@ export function Face({ state, config, theme, customAvatar }) {
               className="transition-all duration-300"
               style={{ opacity: isDisconnected ? 0.3 : 1 }}
             />
-            {/* Eye glow */}
+            {/* Eye glow/pupil - follows mouse */}
             <ellipse
-              cx="260"
-              cy="160"
+              cx={260 + eyeOffset.offsetX}
+              cy={160 + eyeOffset.offsetY}
               rx="8"
               ry="6"
               fill={theme?.accent || '#fbbf24'}
               className={isSpeaking ? 'animate-speaking' : ''}
+              style={{ transition: 'cx 0.05s, cy 0.05s' }}
             />
           </>
         ) : (
