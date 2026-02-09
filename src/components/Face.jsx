@@ -16,6 +16,19 @@ export function Face({ state, config, theme, customAvatar }) {
   const { position: mousePosition } = useMouseTracking(containerRef, eyeTrackingEnabled);
   const eyeOffset = calculateEyeOffset(mousePosition, 5); // Max 5px offset
 
+  // 3D Parallax tilt effect
+  const parallaxEnabled = config?.animations?.parallax !== false;
+  const tiltStyle = useMemo(() => {
+    if (!parallaxEnabled) return {};
+    const maxTilt = 8; // Max degrees of tilt
+    const rotateY = mousePosition.x * maxTilt;
+    const rotateX = -mousePosition.y * maxTilt;
+    return {
+      transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+      transition: 'transform 0.1s ease-out',
+    };
+  }, [mousePosition, parallaxEnabled]);
+
   // Get mood from local memory
   const { mood } = useMood(state);
 
@@ -47,7 +60,7 @@ export function Face({ state, config, theme, customAvatar }) {
       <div ref={containerRef} className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8 relative">
         {/* Weather Atmosphere */}
         <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
-        <div className="relative z-10">
+        <div className="relative z-10" style={tiltStyle}>
           {/* Mood halo with breathing animation */}
           <div
             className="absolute -inset-4 rounded-full pointer-events-none"
@@ -109,7 +122,9 @@ export function Face({ state, config, theme, customAvatar }) {
           animation: `breathe ${breathingSpeed} ease-in-out infinite`,
         }}
       />
-      <svg
+      {/* 3D Tilt wrapper for the actual face */}
+      <div style={tiltStyle}>
+        <svg
         viewBox="0 0 400 400"
         className={`w-full h-full max-w-[80vh] max-h-[80vh] transition-all duration-300 relative z-0 ${
           isThinking ? 'animate-thinking' : ''
@@ -284,6 +299,7 @@ export function Face({ state, config, theme, customAvatar }) {
         }}
       />
     </svg>
+      </div> {/* Close the 3D tilt wrapper */}
     </div>
   );
 }
