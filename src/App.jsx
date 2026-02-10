@@ -5,8 +5,10 @@ import { ChatBubble } from './components/ChatBubble';
 import { AvatarGenerator, loadSavedAvatar } from './components/AvatarGenerator';
 import { ThemeSelector } from './components/ThemeSelector';
 import { Confetti } from './components/Confetti';
+import { AudioVisualizer } from './components/AudioVisualizer';
 import { useGateway } from './hooks/useGateway';
 import { useCelebration } from './hooks/useCelebration';
+import { useAudioReactive } from './hooks/useAudioReactive';
 import { getTheme, loadThemePreference, saveThemePreference } from './lib/themePresets';
 
 function App() {
@@ -63,6 +65,10 @@ function App() {
   
   // Celebration effects
   const { shouldCelebrate, celebrate } = useCelebration(state, lastResponse);
+  
+  // Audio reactive mode
+  const [audioReactiveEnabled, setAudioReactiveEnabled] = useState(false);
+  const { audioLevel, isListening, toggleListening } = useAudioReactive(audioReactiveEnabled);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -123,12 +129,19 @@ function App() {
       />
 
       {/* Main face */}
-      <div className="flex-1 flex items-center justify-center p-8 w-full">
+      <div className="flex-1 flex items-center justify-center p-8 w-full relative">
+        {/* Audio visualizer overlay */}
+        <AudioVisualizer 
+          audioLevel={audioLevel} 
+          theme={activeTheme} 
+          enabled={isListening}
+        />
         <Face
           state={state}
           config={config}
           theme={activeTheme}
           customAvatar={customAvatar}
+          audioLevel={audioLevel}
         />
       </div>
 
@@ -141,15 +154,35 @@ function App() {
 
       {/* Bottom controls */}
       <div className="absolute bottom-0 left-0 right-0 px-2 sm:px-4 flex items-center justify-between">
-        {/* Avatar Generator Toggle */}
-        <button
-          onClick={() => setShowAvatarGenerator(!showAvatarGenerator)}
-          className="text-sm px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
-          style={{ color: activeTheme.text }}
-        >
-          <span>⚡</span>
-          <span>{showAvatarGenerator ? 'Back to Face' : 'Generate Avatar'}</span>
-        </button>
+        {/* Left controls */}
+        <div className="flex items-center gap-2">
+          {/* Avatar Generator Toggle */}
+          <button
+            onClick={() => setShowAvatarGenerator(!showAvatarGenerator)}
+            className="text-sm px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
+            style={{ color: activeTheme.text }}
+          >
+            <span>⚡</span>
+            <span>{showAvatarGenerator ? 'Back to Face' : 'Generate Avatar'}</span>
+          </button>
+          
+          {/* Audio Reactive Toggle */}
+          <button
+            onClick={() => {
+              setAudioReactiveEnabled(!audioReactiveEnabled);
+              if (!audioReactiveEnabled) {
+                toggleListening();
+              }
+            }}
+            className={`text-sm px-3 py-2 rounded-full transition-colors flex items-center gap-2 ${
+              isListening ? 'bg-green-500/30 hover:bg-green-500/40' : 'bg-white/10 hover:bg-white/20'
+            }`}
+            style={{ color: activeTheme.text }}
+            title="Toggle audio reactive mode"
+          >
+            <span>{isListening ? '🎤' : '🔇'}</span>
+          </button>
+        </div>
 
         {/* Environment badge + Fullscreen hint */}
         <div className="flex items-center gap-4 text-xs" style={{ color: activeTheme.text }}>
