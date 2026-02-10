@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Face } from './components/Face';
 import { StatusBar } from './components/StatusBar';
 import { ChatBubble } from './components/ChatBubble';
@@ -9,6 +9,7 @@ import { AudioVisualizer } from './components/AudioVisualizer';
 import { useGateway } from './hooks/useGateway';
 import { useCelebration } from './hooks/useCelebration';
 import { useAudioReactive } from './hooks/useAudioReactive';
+import { useSoundEffects } from './hooks/useSoundEffects';
 import { getTheme, loadThemePreference, saveThemePreference } from './lib/themePresets';
 
 function App() {
@@ -69,6 +70,26 @@ function App() {
   // Audio reactive mode
   const [audioReactiveEnabled, setAudioReactiveEnabled] = useState(false);
   const { audioLevel, isListening, toggleListening } = useAudioReactive(audioReactiveEnabled);
+  
+  // Sound effects
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const { playChime, playThinking, playSuccess, playError } = useSoundEffects(soundEnabled, 0.2);
+  
+  // Trigger sounds on state changes
+  const lastStateRef = useRef(state);
+  useEffect(() => {
+    if (lastStateRef.current !== state) {
+      if (state === 'THINKING') playThinking();
+      if (state === 'SPEAKING' && lastStateRef.current === 'THINKING') playChime();
+      if (state === 'ERROR') playError();
+      lastStateRef.current = state;
+    }
+  }, [state, playThinking, playChime, playError]);
+  
+  // Trigger success sound on celebration
+  useEffect(() => {
+    if (shouldCelebrate) playSuccess();
+  }, [shouldCelebrate, playSuccess]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -181,6 +202,18 @@ function App() {
             title="Toggle audio reactive mode"
           >
             <span>{isListening ? '🎤' : '🔇'}</span>
+          </button>
+          
+          {/* Sound Effects Toggle */}
+          <button
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className={`text-sm px-3 py-2 rounded-full transition-colors flex items-center gap-2 ${
+              soundEnabled ? 'bg-white/10 hover:bg-white/20' : 'bg-red-500/20 hover:bg-red-500/30'
+            }`}
+            style={{ color: activeTheme.text }}
+            title="Toggle sound effects"
+          >
+            <span>{soundEnabled ? '🔊' : '🔕'}</span>
           </button>
         </div>
 
