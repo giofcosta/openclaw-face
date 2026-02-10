@@ -4,7 +4,9 @@ import { StatusBar } from './components/StatusBar';
 import { ChatBubble } from './components/ChatBubble';
 import { AvatarGenerator, loadSavedAvatar } from './components/AvatarGenerator';
 import { ThemeSelector } from './components/ThemeSelector';
+import { Confetti } from './components/Confetti';
 import { useGateway } from './hooks/useGateway';
+import { useCelebration } from './hooks/useCelebration';
 import { getTheme, loadThemePreference, saveThemePreference } from './lib/themePresets';
 
 function App() {
@@ -58,6 +60,9 @@ function App() {
   }, []);
 
   const { state, message, lastResponse, STATES } = useGateway(config);
+  
+  // Celebration effects
+  const { shouldCelebrate, celebrate } = useCelebration(state, lastResponse);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -97,6 +102,9 @@ function App() {
       className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden p-6 sm:p-8 lg:p-12"
       style={{ background: activeTheme.background }}
     >
+      {/* Celebration Confetti */}
+      <Confetti trigger={shouldCelebrate} theme={activeTheme} />
+
       {/* Theme Selector - Top Right */}
       <div className="absolute top-4 right-4 z-30">
         <ThemeSelector 
