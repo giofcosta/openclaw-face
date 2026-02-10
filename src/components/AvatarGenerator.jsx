@@ -5,6 +5,28 @@ import { Toast, useToast } from './Toast';
 
 const STORAGE_KEY = 'kratos-custom-avatar';
 
+// Available avatar providers
+const PROVIDERS = [
+  {
+    id: 'dicebear',
+    name: 'DiceBear',
+    description: 'Reliable SVG avatars',
+    icon: '🔷',
+  },
+  {
+    id: 'pollinations',
+    name: 'Pollinations AI',
+    description: 'AI-generated (may be slow)',
+    icon: '🎨',
+  },
+  {
+    id: 'robohash',
+    name: 'Robohash',
+    description: 'Robot-style avatars',
+    icon: '🤖',
+  },
+];
+
 const styles = [
   {
     id: 'kratos',
@@ -45,6 +67,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState('kratos');
+  const [selectedProvider, setSelectedProvider] = useState('dicebear');
   const [history, setHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('generate');
   const { toast, showToast, hideToast } = useToast();
@@ -83,6 +106,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
       const result = await generateKratosAvatar(selectedStyle, {
         width: 512,
         height: 512,
+        provider: selectedProvider,
       });
 
       if (result.success) {
@@ -249,6 +273,36 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
                           style={{ background: theme?.primary }}
                         />
                       )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Provider Selection */}
+                <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+                  Provider
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {PROVIDERS.map((provider) => (
+                    <button
+                      key={provider.id}
+                      onClick={() => setSelectedProvider(provider.id)}
+                      className={cn(
+                        'relative p-3 rounded-lg border-2 text-left transition-all',
+                        selectedProvider === provider.id
+                          ? 'border-primary bg-primary/10'
+                          : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                      )}
+                      style={{
+                        borderColor: selectedProvider === provider.id ? theme?.primary : undefined,
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{provider.icon}</span>
+                        <div className="min-w-0">
+                          <div className="font-medium text-white text-sm truncate">{provider.name}</div>
+                          <div className="text-xs text-white/40 truncate">{provider.description}</div>
+                        </div>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -427,7 +481,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onR
 
         {/* Footer */}
         <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-t border-white/10 text-center text-xs text-white/40">
-          Powered by Pollinations.ai • Free unlimited generation
+          Powered by {PROVIDERS.find(p => p.id === selectedProvider)?.name || 'DiceBear'}
         </div>
       </div>
     </div>

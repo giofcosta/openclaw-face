@@ -157,4 +157,30 @@ test.describe('Avatar Generation', () => {
       await expect(styleBtn).toHaveClass(/border-primary|border-\[/);
     }
   });
+
+  test('provider selection changes the avatar provider', async ({ page }) => {
+    // Open avatar generator
+    await page.click('text=Generate');
+    await page.waitForSelector('text=Avatar Studio');
+
+    // Check that provider section heading is visible
+    await expect(page.getByRole('heading', { name: 'Provider' })).toBeVisible();
+
+    // Check default footer shows DiceBear
+    await expect(page.locator('text=Powered by DiceBear')).toBeVisible();
+
+    // Select Pollinations AI - use the button in the provider section
+    const pollinationsBtn = page.getByRole('button', { name: /Pollinations AI/ }).first();
+    await pollinationsBtn.click();
+    
+    // Footer should update
+    await expect(page.locator('text=Powered by Pollinations AI')).toBeVisible();
+
+    // Select Robohash
+    const robohashBtn = page.getByRole('button', { name: /Robohash/ }).first();
+    await robohashBtn.click();
+    
+    // Footer should update
+    await expect(page.locator('text=Powered by Robohash')).toBeVisible();
+  });
 });
