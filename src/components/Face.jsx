@@ -131,15 +131,18 @@ export function Face({ state, config, theme, customAvatar }) {
       <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
       {/* Mood halo for SVG face with breathing animation */}
       <div
-        className="absolute inset-0 rounded-full pointer-events-none z-10"
+        className="absolute rounded-full pointer-events-none z-10"
         style={{
+          top: '-10%',
+          left: '-10%',
+          width: '120%',
+          height: '120%',
           background: `radial-gradient(circle, ${moodColor}30 0%, ${moodColor}15 40%, transparent 70%)`,
           boxShadow: `0 0 60px ${moodColor}50, 0 0 100px ${moodColor}30`,
-          transform: 'scale(1.1)',
           animation: `breathe ${breathingSpeed} ease-in-out infinite`,
         }}
       />
-      {/* 3D Tilt wrapper for the actual face */}
+      {/* Face container with 3D tilt */}
       <div data-testid="face-tilt-wrapper" style={tiltStyle}>
         <svg
         viewBox="0 0 400 400"
@@ -184,7 +187,7 @@ export function Face({ state, config, theme, customAvatar }) {
               className="transition-all duration-300"
               style={{ opacity: isDisconnected ? 0.3 : 1 }}
             />
-            {/* Eye glow/pupil - follows mouse */}
+            {/* Eye glow/pupil - follows mouse instantly */}
             <ellipse
               cx={140 + eyeOffset.offsetX}
               cy={160 + eyeOffset.offsetY}
@@ -192,7 +195,6 @@ export function Face({ state, config, theme, customAvatar }) {
               ry="6"
               fill={theme?.accent || '#fbbf24'}
               className={isSpeaking ? 'animate-speaking' : ''}
-              style={{ transition: 'cx 0.05s, cy 0.05s' }}
             />
           </>
         ) : (
@@ -217,7 +219,7 @@ export function Face({ state, config, theme, customAvatar }) {
               className="transition-all duration-300"
               style={{ opacity: isDisconnected ? 0.3 : 1 }}
             />
-            {/* Eye glow/pupil - follows mouse */}
+            {/* Eye glow/pupil - follows mouse instantly */}
             <ellipse
               cx={260 + eyeOffset.offsetX}
               cy={160 + eyeOffset.offsetY}
@@ -225,7 +227,6 @@ export function Face({ state, config, theme, customAvatar }) {
               ry="6"
               fill={theme?.accent || '#fbbf24'}
               className={isSpeaking ? 'animate-speaking' : ''}
-              style={{ transition: 'cx 0.05s, cy 0.05s' }}
             />
           </>
         ) : (
