@@ -3,6 +3,7 @@ import { STATES } from '../hooks/useGateway';
 import { useMood, MOODS } from '../hooks/useMood';
 import { WeatherAtmosphere } from './WeatherAtmosphere';
 import { useMouseTracking, calculateEyeOffset } from '../hooks/useMouseTracking';
+import { ParticleSystem } from './ParticleSystem';
 
 export function Face({ state, config, theme, customAvatar }) {
   const containerRef = useRef(null);
@@ -58,6 +59,12 @@ export function Face({ state, config, theme, customAvatar }) {
   if (customAvatar) {
     return (
       <div ref={containerRef} className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8 relative">
+        {/* Particle System */}
+        <ParticleSystem 
+          state={state} 
+          theme={theme} 
+          enabled={config?.animations?.particles !== false}
+        />
         {/* Weather Atmosphere */}
         <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
         <div className="relative z-10" style={tiltStyle}>
@@ -110,6 +117,12 @@ export function Face({ state, config, theme, customAvatar }) {
 
   return (
     <div ref={containerRef} className="relative">
+      {/* Particle System */}
+      <ParticleSystem 
+        state={state} 
+        theme={theme} 
+        enabled={config?.animations?.particles !== false}
+      />
       {/* Weather Atmosphere */}
       <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
       {/* Mood halo for SVG face with breathing animation */}
