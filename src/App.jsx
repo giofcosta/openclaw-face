@@ -34,6 +34,13 @@ function App() {
     // Apply to document
     const theme = getTheme(key);
     document.body.style.background = theme.background;
+    if (theme.backgroundImage) {
+      document.body.style.backgroundImage = `url(${theme.backgroundImage})`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+    } else {
+      document.body.style.backgroundImage = 'none';
+    }
   };
 
   // Load config on mount based on environment
@@ -53,6 +60,13 @@ function App() {
         root.style.setProperty('--face-accent', theme.accent);
         root.style.setProperty('--face-bg', theme.background);
         document.body.style.background = theme.background;
+        if (theme.backgroundImage) {
+          document.body.style.backgroundImage = `url(${theme.backgroundImage})`;
+          document.body.style.backgroundSize = 'cover';
+          document.body.style.backgroundPosition = 'center';
+        } else {
+          document.body.style.backgroundImage = 'none';
+        }
         setLoading(false);
       })
       .catch(err => {
@@ -127,7 +141,13 @@ function App() {
   return (
     <div 
       className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden p-6 sm:p-8 lg:p-12"
-      style={{ background: activeTheme.background }}
+      style={{ 
+        background: activeTheme.background,
+        backgroundImage: activeTheme.backgroundImage ? `url(${activeTheme.backgroundImage})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
     >
       {/* Celebration Confetti */}
       <Confetti trigger={shouldCelebrate} theme={activeTheme} />

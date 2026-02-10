@@ -2,6 +2,15 @@
  * Theme Presets - One-click color schemes
  */
 
+// Import background images
+import cyberpunkBg from '../assets/backgrounds/cyberpunk.png';
+import natureBg from '../assets/backgrounds/nature.png';
+import minimalBg from '../assets/backgrounds/minimal.png';
+import neonBg from '../assets/backgrounds/neon.png';
+import oceanBg from '../assets/backgrounds/ocean.png';
+import sunsetBg from '../assets/backgrounds/sunset.png';
+import midnightBg from '../assets/backgrounds/midnight.png';
+
 export const THEME_PRESETS = {
   default: {
     name: 'Default',
@@ -10,6 +19,7 @@ export const THEME_PRESETS = {
     accent: '#fbbf24',
     background: '#0f172a',
     text: '#f8fafc',
+    backgroundImage: null, // No background image for default
   },
   cyberpunk: {
     name: 'Cyberpunk',
@@ -18,6 +28,7 @@ export const THEME_PRESETS = {
     accent: '#22d3ee',
     background: '#0c0a1d',
     text: '#f0abfc',
+    backgroundImage: cyberpunkBg,
   },
   nature: {
     name: 'Nature',
@@ -26,6 +37,7 @@ export const THEME_PRESETS = {
     accent: '#a3e635',
     background: '#14532d',
     text: '#dcfce7',
+    backgroundImage: natureBg,
   },
   minimal: {
     name: 'Minimal',
@@ -34,6 +46,7 @@ export const THEME_PRESETS = {
     accent: '#ffffff',
     background: '#1e1e1e',
     text: '#e2e8f0',
+    backgroundImage: minimalBg,
   },
   neon: {
     name: 'Neon',
@@ -42,6 +55,7 @@ export const THEME_PRESETS = {
     accent: '#facc15',
     background: '#0f0a19',
     text: '#fae8ff',
+    backgroundImage: neonBg,
   },
   ocean: {
     name: 'Ocean',
@@ -50,6 +64,7 @@ export const THEME_PRESETS = {
     accent: '#38bdf8',
     background: '#0c4a6e',
     text: '#e0f2fe',
+    backgroundImage: oceanBg,
   },
   sunset: {
     name: 'Sunset',
@@ -58,6 +73,7 @@ export const THEME_PRESETS = {
     accent: '#fbbf24',
     background: '#431407',
     text: '#ffedd5',
+    backgroundImage: sunsetBg,
   },
   midnight: {
     name: 'Midnight',
@@ -66,6 +82,7 @@ export const THEME_PRESETS = {
     accent: '#a5b4fc',
     background: '#020617',
     text: '#c7d2fe',
+    backgroundImage: midnightBg,
   },
 };
 
