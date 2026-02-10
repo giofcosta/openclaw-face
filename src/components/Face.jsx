@@ -4,6 +4,7 @@ import { useMood, MOODS } from '../hooks/useMood';
 import { WeatherAtmosphere } from './WeatherAtmosphere';
 import { useMouseTracking, calculateEyeOffset } from '../hooks/useMouseTracking';
 import { ParticleSystem } from './ParticleSystem';
+import { useExpression } from '../hooks/useExpression';
 
 export function Face({ state, config, theme, customAvatar }) {
   const containerRef = useRef(null);
@@ -16,6 +17,9 @@ export function Face({ state, config, theme, customAvatar }) {
   const eyeTrackingEnabled = config?.animations?.eyeTracking !== false;
   const { position: mousePosition } = useMouseTracking(containerRef, eyeTrackingEnabled);
   const eyeOffset = calculateEyeOffset(mousePosition, 5); // Max 5px offset
+
+  // Expression morphing - smooth transitions between states
+  const { config: expressionConfig, transitionStyles } = useExpression(state);
 
   // 3D Parallax tilt effect
   const parallaxEnabled = config?.animations?.parallax !== false;
@@ -110,10 +114,10 @@ export function Face({ state, config, theme, customAvatar }) {
   }, [isError, isDisconnected, theme]);
 
   const glowIntensity = useMemo(() => {
-    if (isThinking) return '0 0 60px';
-    if (isSpeaking) return '0 0 80px';
-    return '0 0 30px';
-  }, [isThinking, isSpeaking]);
+    // Use expression config for dynamic glow
+    const intensity = Math.round(30 + expressionConfig.glowIntensity * 50);
+    return `0 0 ${intensity}px`;
+  }, [expressionConfig.glowIntensity]);
 
   return (
     <div ref={containerRef} className="relative">

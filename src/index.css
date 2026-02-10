@@ -91,3 +91,16 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }
+
+/* Expression morphing transitions */
+.expression-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expression-transition-fast {
+  transition: all 0.15s ease-out;
+}
+
+.expression-transition-slow {
+  transition: all 0.5s ease-in-out;
+}
