@@ -47,6 +47,18 @@ body {
   95% { transform: scaleY(0.1); }
 }
 
+/* Breathing animation for mood halo */
+@keyframes breathe {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
 .animate-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
@@ -61,4 +73,33 @@ body {
 
 .animate-blink {
   animation: blink 4s ease-in-out infinite;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Expression morphing transitions */
+.expression-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expression-transition-fast {
+  transition: all 0.15s ease-out;
+}
+
+.expression-transition-slow {
+  transition: all 0.5s ease-in-out;
 }

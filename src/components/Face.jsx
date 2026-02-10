@@ -1,13 +1,39 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { STATES } from '../hooks/useGateway';
 import { useMood, MOODS } from '../hooks/useMood';
+import { WeatherAtmosphere } from './WeatherAtmosphere';
+import { useMouseTracking, calculateEyeOffset } from '../hooks/useMouseTracking';
+import { ParticleSystem } from './ParticleSystem';
+import { useExpression } from '../hooks/useExpression';
 
 export function Face({ state, config, theme, customAvatar }) {
+  const containerRef = useRef(null);
   const isThinking = state === STATES.THINKING;
   const isSpeaking = state === STATES.SPEAKING;
   const isError = state === STATES.ERROR;
   const isDisconnected = state === STATES.DISCONNECTED || state === STATES.CONNECTING;
   
+  // Eye tracking - eyes follow mouse cursor
+  const eyeTrackingEnabled = config?.animations?.eyeTracking !== false;
+  const { position: mousePosition } = useMouseTracking(containerRef, eyeTrackingEnabled);
+  const eyeOffset = calculateEyeOffset(mousePosition, 5); // Max 5px offset
+
+  // Expression morphing - smooth transitions between states
+  const { config: expressionConfig, transitionStyles } = useExpression(state);
+
+  // 3D Parallax tilt effect
+  const parallaxEnabled = config?.animations?.parallax !== false;
+  const tiltStyle = useMemo(() => {
+    if (!parallaxEnabled) return {};
+    const maxTilt = 8; // Max degrees of tilt
+    const rotateY = mousePosition.x * maxTilt;
+    const rotateX = -mousePosition.y * maxTilt;
+    return {
+      transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+      transition: 'transform 0.1s ease-out',
+    };
+  }, [mousePosition, parallaxEnabled]);
+
   // Get mood from local memory
   const { mood } = useMood(state);
 
@@ -26,17 +52,33 @@ export function Face({ state, config, theme, customAvatar }) {
 
   const eyeStyle = config?.face?.eyeShape || 'angular';
 
+  // Breathing animation speed based on state (must be before early return)
+  const breathingSpeed = useMemo(() => {
+    if (isThinking || isSpeaking) return '0.8s'; // Fast when active
+    if (state === STATES.LISTENING) return '2s'; // Medium when listening
+    return '4s'; // Slow when idle
+  }, [isThinking, isSpeaking, state]);
+
   // If custom avatar is provided, show it instead of SVG
   if (customAvatar) {
     return (
-      <div className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8">
-        <div className="relative">
-          {/* Mood halo */}
-          <div 
-            className="absolute -inset-4 rounded-full animate-pulse"
+      <div ref={containerRef} className="w-[80%] h-[80%] max-w-[600px] max-h-[600px] flex items-center justify-center relative">
+        {/* Particle System */}
+        <ParticleSystem 
+          state={state} 
+          theme={theme} 
+          enabled={config?.animations?.particles !== false}
+        />
+        {/* Weather Atmosphere */}
+        <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
+        <div className="relative z-10" data-testid="face-tilt-wrapper" style={tiltStyle}>
+          {/* Mood halo with breathing animation */}
+          <div
+            className="absolute -inset-4 rounded-full pointer-events-none"
             style={{
               background: `radial-gradient(circle, ${moodColor}40 0%, ${moodColor}20 40%, transparent 70%)`,
               boxShadow: `0 0 40px ${moodColor}60, 0 0 80px ${moodColor}40`,
+              animation: `breathe ${breathingSpeed} ease-in-out infinite`,
             }}
           />
           <div 
@@ -72,25 +114,39 @@ export function Face({ state, config, theme, customAvatar }) {
   }, [isError, isDisconnected, theme]);
 
   const glowIntensity = useMemo(() => {
-    if (isThinking) return '0 0 60px';
-    if (isSpeaking) return '0 0 80px';
-    return '0 0 30px';
-  }, [isThinking, isSpeaking]);
+    // Use expression config for dynamic glow
+    const intensity = Math.round(30 + expressionConfig.glowIntensity * 50);
+    return `0 0 ${intensity}px`;
+  }, [expressionConfig.glowIntensity]);
 
   return (
-    <div className="relative">
-      {/* Mood halo for SVG face */}
-      <div 
-        className="absolute inset-0 rounded-full animate-pulse pointer-events-none"
+    <div ref={containerRef} className="relative w-[80%] h-[80%] max-w-[600px] max-h-[600px] aspect-square">
+      {/* Particle System */}
+      <ParticleSystem 
+        state={state} 
+        theme={theme} 
+        enabled={config?.animations?.particles !== false}
+      />
+      {/* Weather Atmosphere */}
+      <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
+      {/* Mood halo for SVG face with breathing animation */}
+      <div
+        className="absolute rounded-full pointer-events-none z-10"
         style={{
+          top: '-10%',
+          left: '-10%',
+          width: '120%',
+          height: '120%',
           background: `radial-gradient(circle, ${moodColor}30 0%, ${moodColor}15 40%, transparent 70%)`,
           boxShadow: `0 0 60px ${moodColor}50, 0 0 100px ${moodColor}30`,
-          transform: 'scale(1.1)',
+          animation: `breathe ${breathingSpeed} ease-in-out infinite`,
         }}
       />
-      <svg
+      {/* Face container with 3D tilt */}
+      <div data-testid="face-tilt-wrapper" style={tiltStyle}>
+        <svg
         viewBox="0 0 400 400"
-        className={`w-full h-full max-w-[80vh] max-h-[80vh] transition-all duration-300 relative z-0 ${
+        className={`w-full h-full transition-all duration-300 relative z-0 ${
           isThinking ? 'animate-thinking' : ''
         }`}
         style={{
@@ -131,10 +187,10 @@ export function Face({ state, config, theme, customAvatar }) {
               className="transition-all duration-300"
               style={{ opacity: isDisconnected ? 0.3 : 1 }}
             />
-            {/* Eye glow */}
+            {/* Eye glow/pupil - follows mouse instantly */}
             <ellipse
-              cx="140"
-              cy="160"
+              cx={140 + eyeOffset.offsetX}
+              cy={160 + eyeOffset.offsetY}
               rx="8"
               ry="6"
               fill={theme?.accent || '#fbbf24'}
@@ -163,10 +219,10 @@ export function Face({ state, config, theme, customAvatar }) {
               className="transition-all duration-300"
               style={{ opacity: isDisconnected ? 0.3 : 1 }}
             />
-            {/* Eye glow */}
+            {/* Eye glow/pupil - follows mouse instantly */}
             <ellipse
-              cx="260"
-              cy="160"
+              cx={260 + eyeOffset.offsetX}
+              cy={160 + eyeOffset.offsetY}
               rx="8"
               ry="6"
               fill={theme?.accent || '#fbbf24'}
@@ -261,6 +317,7 @@ export function Face({ state, config, theme, customAvatar }) {
         }}
       />
     </svg>
+      </div> {/* Close the 3D tilt wrapper */}
     </div>
   );
 }
