@@ -150,7 +150,7 @@ function App() {
       />
 
       {/* Main face */}
-      <div className="flex-1 flex items-center justify-center p-8 w-full relative">
+      <div className="flex-1 flex items-center justify-center p-4 w-full relative">
         {/* Audio visualizer overlay */}
         <AudioVisualizer 
           audioLevel={audioLevel} 

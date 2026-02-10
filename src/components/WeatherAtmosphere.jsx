@@ -82,6 +82,7 @@ export function WeatherAtmosphere({ enabled = true, theme }) {
   return (
     <canvas
       ref={canvasRef}
+      data-testid="weather-canvas"
       className="absolute inset-0 pointer-events-none z-0"
       style={{ opacity: 0.6 }}
     />

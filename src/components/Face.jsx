@@ -62,7 +62,7 @@ export function Face({ state, config, theme, customAvatar }) {
   // If custom avatar is provided, show it instead of SVG
   if (customAvatar) {
     return (
-      <div ref={containerRef} className="w-full h-full max-w-[70vh] max-h-[70vh] flex items-center justify-center p-8 relative">
+      <div ref={containerRef} className="w-full h-full max-w-[85vh] max-h-[85vh] flex items-center justify-center p-4 relative">
         {/* Particle System */}
         <ParticleSystem 
           state={state} 
@@ -71,7 +71,7 @@ export function Face({ state, config, theme, customAvatar }) {
         />
         {/* Weather Atmosphere */}
         <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
-        <div className="relative z-10" style={tiltStyle}>
+        <div className="relative z-10" data-testid="face-tilt-wrapper" style={tiltStyle}>
           {/* Mood halo with breathing animation */}
           <div
             className="absolute -inset-4 rounded-full pointer-events-none"
@@ -140,10 +140,10 @@ export function Face({ state, config, theme, customAvatar }) {
         }}
       />
       {/* 3D Tilt wrapper for the actual face */}
-      <div style={tiltStyle}>
+      <div data-testid="face-tilt-wrapper" style={tiltStyle}>
         <svg
         viewBox="0 0 400 400"
-        className={`w-full h-full max-w-[80vh] max-h-[80vh] transition-all duration-300 relative z-0 ${
+        className={`w-full h-full max-w-[90vh] max-h-[90vh] transition-all duration-300 relative z-0 ${
           isThinking ? 'animate-thinking' : ''
         }`}
         style={{

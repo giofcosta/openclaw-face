@@ -7,13 +7,13 @@ test.describe('Weather Atmosphere Effects', () => {
   });
 
   test('weather atmosphere canvas is rendered', async ({ page }) => {
-    // The WeatherAtmosphere component renders a canvas with pointer-events-none
-    const canvas = page.locator('canvas.pointer-events-none');
-    await expect(canvas.first()).toBeVisible();
+    // The WeatherAtmosphere component renders a canvas with data-testid
+    const canvas = page.locator('[data-testid="weather-canvas"]');
+    await expect(canvas).toBeVisible();
   });
 
   test('weather canvas is positioned behind the face', async ({ page }) => {
-    const canvas = page.locator('canvas.pointer-events-none').first();
+    const canvas = page.locator('[data-testid="weather-canvas"]');
     await expect(canvas).toBeVisible();
     const className = await canvas.getAttribute('class');
     expect(className).toContain('absolute');
@@ -22,14 +22,14 @@ test.describe('Weather Atmosphere Effects', () => {
   });
 
   test('weather canvas does not block interactions', async ({ page }) => {
-    const canvas = page.locator('canvas.pointer-events-none').first();
+    const canvas = page.locator('[data-testid="weather-canvas"]');
     await expect(canvas).toBeVisible();
     const className = await canvas.getAttribute('class');
     expect(className).toContain('pointer-events-none');
   });
 
   test('weather canvas has subtle opacity', async ({ page }) => {
-    const canvas = page.locator('canvas.pointer-events-none').first();
+    const canvas = page.locator('[data-testid="weather-canvas"]');
     await expect(canvas).toBeVisible();
     const style = await canvas.getAttribute('style');
     expect(style).toContain('opacity');
@@ -47,15 +47,20 @@ test.describe('Weather Atmosphere Effects', () => {
   });
 
   test('weather canvas dimensions match container', async ({ page }) => {
-    const canvas = page.locator('canvas.pointer-events-none').first();
+    const canvas = page.locator('[data-testid="weather-canvas"]');
     await expect(canvas).toBeVisible();
     
-    // Canvas should have width and height attributes set
+    // Wait for canvas to initialize with dimensions (resize runs on mount)
+    await page.waitForTimeout(1000);
+    
+    // Canvas should have width and height attributes set by JS
     const width = await canvas.getAttribute('width');
     const height = await canvas.getAttribute('height');
     
-    // Should have positive dimensions
-    expect(parseInt(width)).toBeGreaterThan(0);
-    expect(parseInt(height)).toBeGreaterThan(0);
+    // Should have positive dimensions (canvas.width sets the attribute)
+    const parsedWidth = parseInt(width) || 0;
+    const parsedHeight = parseInt(height) || 0;
+    expect(parsedWidth).toBeGreaterThan(0);
+    expect(parsedHeight).toBeGreaterThan(0);
   });
 });
