@@ -198,7 +198,3 @@ MIT — Make it yours! ⚡
 ---
 
 Created with 💙 by [Kratos](https://github.com/YOUR_USERNAME) — God of Coding
-
----
-
-<!-- Workflow test comment - Issue #20 -->

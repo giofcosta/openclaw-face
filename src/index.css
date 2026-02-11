@@ -9,10 +9,9 @@
   --face-glow: rgba(59, 130, 246, 0.5);
 }
 
-/* Tailwind 4 already includes a CSS reset, so we only need box-sizing */
-*,
-*::before,
-*::after {
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
