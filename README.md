@@ -163,6 +163,34 @@ The face responds to Gateway events with these visual states:
 - SVG animations
 - WebSocket (Moltbot Gateway protocol)
 
+## GitHub Actions Setup
+
+The project uses GitHub Actions for CI and automatic project board management.
+
+### Auto-move Project Cards Workflow
+
+This workflow automatically moves project cards when PRs are opened or merged.
+
+**Required Setup:**
+
+1. **Create a Personal Access Token (PAT):**
+   - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Click "Generate new token (classic)"
+   - Give it a descriptive name (e.g., "openclaw-face-project-token")
+   - Select the `project` scope (for Projects V2 access)
+   - Click "Generate token" and copy it
+
+2. **Add as Repository Secret:**
+   - Go to your repository → Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `PROJECT_TOKEN`
+   - Value: Paste the PAT you created
+   - Click "Add secret"
+
+**Why is this needed?**
+
+The default `GITHUB_TOKEN` provided by Actions cannot access user-owned Projects V2. A Personal Access Token with `project` scope is required to read and update project items.
+
 ## License
 
 MIT — Make it yours! ⚡
