@@ -1,0 +1,27 @@
+{
+  "identity": {
+    "name": "Kratos",
+    "tagline": "God of Coding (STAGING)",
+    "emoji": "⚡"
+  },
+  "gateway": {
+    "url": "ws://127.0.0.1:18789",
+    "session": "main"
+  },
+  "theme": {
+    "primary": "#f59e0b",
+    "secondary": "#d97706",
+    "accent": "#fbbf24",
+    "background": "#1c1917",
+    "text": "#f8fafc",
+    "glow": "rgba(245, 158, 11, 0.5)"
+  },
+  "face": {
+    "style": "geometric",
+    "eyeShape": "angular",
+    "showName": true,
+    "showStatus": true,
+    "showBubble": true
+  },
+  "environment": "staging"
+}

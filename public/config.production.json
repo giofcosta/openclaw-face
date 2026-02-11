@@ -1,0 +1,27 @@
+{
+  "identity": {
+    "name": "Kratos",
+    "tagline": "God of Coding",
+    "emoji": "⚡"
+  },
+  "gateway": {
+    "url": "ws://127.0.0.1:18789",
+    "session": "main"
+  },
+  "theme": {
+    "primary": "#3b82f6",
+    "secondary": "#1e40af",
+    "accent": "#fbbf24",
+    "background": "#0f172a",
+    "text": "#f8fafc",
+    "glow": "rgba(59, 130, 246, 0.5)"
+  },
+  "face": {
+    "style": "geometric",
+    "eyeShape": "angular",
+    "showName": true,
+    "showStatus": true,
+    "showBubble": true
+  },
+  "environment": "production"
+}

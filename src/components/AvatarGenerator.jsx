@@ -1,8 +1,31 @@
 import { useState, useEffect } from 'react';
 import { generateKratosAvatar, DEFAULT_PROMPTS } from '../lib/avatarGenerator';
 import { buttonVariants, cn } from '../lib/utils';
+import { Toast, useToast } from './Toast';
 
 const STORAGE_KEY = 'kratos-custom-avatar';
+
+// Available avatar providers
+const PROVIDERS = [
+  {
+    id: 'dicebear',
+    name: 'DiceBear',
+    description: 'Reliable SVG avatars',
+    icon: '🔷',
+  },
+  {
+    id: 'pollinations',
+    name: 'Pollinations AI',
+    description: 'AI-generated (may be slow)',
+    icon: '🎨',
+  },
+  {
+    id: 'robohash',
+    name: 'Robohash',
+    description: 'Robot-style avatars',
+    icon: '🤖',
+  },
+];
 
 const styles = [
   {
@@ -35,7 +58,7 @@ const styles = [
   },
 ];
 
-export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
+export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated, onResetToDefault, hasCustomAvatar }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -44,8 +67,16 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState('kratos');
+  const [selectedProvider, setSelectedProvider] = useState('dicebear');
   const [history, setHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('generate');
+  const { toast, showToast, hideToast } = useToast();
+
+  const handleResetToDefault = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    onResetToDefault?.();
+    showToast('Switched to CSS face!', 'success');
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}-history`);
@@ -75,6 +106,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
       const result = await generateKratosAvatar(selectedStyle, {
         width: 512,
         height: 512,
+        provider: selectedProvider,
       });
 
       if (result.success) {
@@ -102,6 +134,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   const handleUse = (url) => {
     localStorage.setItem(STORAGE_KEY, url);
     onAvatarGenerated?.({ url, useAsFace: true });
+    showToast('Avatar set successfully!', 'success');
   };
 
   const handleDownload = async (url) => {
@@ -129,7 +162,8 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <>
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <div
         className="w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
         style={{
@@ -138,7 +172,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-5 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
@@ -151,16 +185,26 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
               <p className="text-sm text-white/50">Generate your Kratos avatar</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'text-white/70 hover:text-white')}
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            {hasCustomAvatar && (
+              <button
+                onClick={handleResetToDefault}
+                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'text-white/70 hover:text-white')}
+              >
+                Use CSS Face
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'text-white/70 hover:text-white')}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex px-6 border-b border-white/10">
+        <div className="flex px-4 sm:px-6 lg:px-8 border-b border-white/10">
           {['generate', 'history'].map((tab) => (
             <button
               key={tab}
@@ -187,7 +231,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {activeTab === 'generate' ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Style Selection */}
@@ -195,13 +239,13 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                 <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
                   Choose Style
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {styles.map((style) => (
                     <button
                       key={style.id}
                       onClick={() => setSelectedStyle(style.id)}
                       className={cn(
-                        'relative p-4 rounded-xl border-2 text-left transition-all group',
+                        'relative p-5 rounded-xl border-2 text-left transition-all group',
                         selectedStyle === style.id
                           ? 'border-primary bg-primary/10'
                           : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
@@ -233,12 +277,42 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                   ))}
                 </div>
 
+                {/* Provider Selection */}
+                <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider">
+                  Provider
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {PROVIDERS.map((provider) => (
+                    <button
+                      key={provider.id}
+                      onClick={() => setSelectedProvider(provider.id)}
+                      className={cn(
+                        'relative p-3 rounded-lg border-2 text-left transition-all',
+                        selectedProvider === provider.id
+                          ? 'border-primary bg-primary/10'
+                          : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+                      )}
+                      style={{
+                        borderColor: selectedProvider === provider.id ? theme?.primary : undefined,
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{provider.icon}</span>
+                        <div className="min-w-0">
+                          <div className="font-medium text-white text-sm truncate">{provider.name}</div>
+                          <div className="text-xs text-white/40 truncate">{provider.description}</div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
                 <button
                   onClick={handleGenerate}
                   disabled={loading}
                   className={cn(
                     buttonVariants({ size: 'lg' }),
-                    'w-full mt-4',
+                    'w-full sm:w-auto sm:min-w-[200px] mt-4',
                     loading && 'opacity-70 cursor-not-allowed'
                   )}
                   style={{ background: theme?.primary }}
@@ -269,7 +343,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                 </button>
 
                 {error && (
-                  <div className="p-4 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
+                  <div className="p-5 rounded-lg bg-red-500/20 text-red-400 text-sm border border-red-500/30">
                     {error}
                   </div>
                 )}
@@ -280,7 +354,7 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                 <h3 className="text-sm font-semibold text-white/70 uppercase tracking-wider mb-4">
                   Preview
                 </h3>
-                <div className="flex-1 flex items-center justify-center min-h-[300px] rounded-xl bg-white/5 border border-white/10 p-8">
+                <div className="flex-1 flex items-center justify-center min-h-[280px] sm:min-h-[300px] rounded-xl bg-white/5 border border-white/10 p-4 sm:p-6 lg:p-10">
                   {previewUrl ? (
                     <div className="w-full max-w-sm space-y-4">
                       <div
@@ -334,17 +408,17 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
                           }}
                         />
                       </div>
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
                         <button
                           onClick={() => handleUse(previewUrl)}
-                          className={cn(buttonVariants(), 'flex-1')}
+                          className={cn(buttonVariants(), 'sm:min-w-[140px]')}
                           style={{ background: theme?.primary }}
                         >
                           Use as Face
                         </button>
                         <button
                           onClick={() => handleDownload(previewUrl)}
-                          className={cn(buttonVariants({ variant: 'outline' }), 'flex-1')}
+                          className={cn(buttonVariants({ variant: 'outline' }), 'sm:min-w-[140px]')}
                         >
                           Download
                         </button>
@@ -360,9 +434,9 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
               {history.length === 0 ? (
-                <div className="col-span-full text-center py-16 text-white/40">
+                <div className="col-span-full text-center py-16 px-8 text-white/40">
                   <div className="text-5xl mb-4">📷</div>
                   <p>No avatars yet. Generate your first!</p>
                 </div>
@@ -406,11 +480,23 @@ export function AvatarGenerator({ isOpen, onClose, theme, onAvatarGenerated }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-white/10 text-center text-xs text-white/40">
-          Powered by Pollinations.ai • Free unlimited generation
+        <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-t border-white/10 text-center text-xs text-white/40">
+          Powered by {PROVIDERS.find(p => p.id === selectedProvider)?.name || 'DiceBear'}
         </div>
       </div>
     </div>
+    
+    {/* Toast notification */}
+    {toast && (
+      <Toast
+        key={toast.key}
+        message={toast.message}
+        type={toast.type}
+        duration={toast.duration}
+        onClose={hideToast}
+      />
+    )}
+    </>
   );
 }
 

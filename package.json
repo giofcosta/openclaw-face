@@ -1,20 +1,35 @@
 {
   "name": "moltbot-face",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:staging": "VITE_ENV=staging vite --port 18795",
+    "dev:prod": "VITE_ENV=production vite --port 18794",
+    "start:staging": "VITE_ENV=staging vite --port 18795 --host",
+    "start:prod": "VITE_ENV=production vite --port 18794 --host",
     "build": "vite build",
+    "build:staging": "VITE_ENV=staging vite build --outDir dist/staging",
+    "build:prod": "VITE_ENV=production vite build --outDir dist/production",
+    "preview": "vite preview",
+    "preview:staging": "vite preview --port 18795",
+    "preview:ci": "vite preview --port 4173",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "test:mobile": "npx playwright test --project='Mobile Chrome'",
+    "test:desktop": "npx playwright test --project='Desktop Chrome'"
   },
   "dependencies": {
+    "class-variance-authority": "^0.7.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.58.1",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

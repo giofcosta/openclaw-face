@@ -59,6 +59,19 @@ export function Face({ state, config, theme, customAvatar }) {
     return '4s'; // Slow when idle
   }, [isThinking, isSpeaking, state]);
 
+  // Dynamic styles based on state (must be before early return - Rules of Hooks)
+  const faceColor = useMemo(() => {
+    if (isError) return '#ef4444';
+    if (isDisconnected) return '#64748b';
+    return theme?.primary || '#3b82f6';
+  }, [isError, isDisconnected, theme]);
+
+  const glowIntensity = useMemo(() => {
+    // Use expression config for dynamic glow
+    const intensity = Math.round(30 + expressionConfig.glowIntensity * 50);
+    return `0 0 ${intensity}px`;
+  }, [expressionConfig.glowIntensity]);
+
   // If custom avatar is provided, show it instead of SVG
   if (customAvatar) {
     return (
@@ -106,21 +119,8 @@ export function Face({ state, config, theme, customAvatar }) {
     );
   }
 
-  // Dynamic styles based on state
-  const faceColor = useMemo(() => {
-    if (isError) return '#ef4444';
-    if (isDisconnected) return '#64748b';
-    return theme?.primary || '#3b82f6';
-  }, [isError, isDisconnected, theme]);
-
-  const glowIntensity = useMemo(() => {
-    // Use expression config for dynamic glow
-    const intensity = Math.round(30 + expressionConfig.glowIntensity * 50);
-    return `0 0 ${intensity}px`;
-  }, [expressionConfig.glowIntensity]);
-
   return (
-    <div ref={containerRef} className="relative w-[80%] h-[80%] max-w-[600px] max-h-[600px] aspect-square">
+    <div ref={containerRef} className="w-[80%] h-[80%] max-w-[600px] max-h-[600px] flex items-center justify-center relative">
       {/* Particle System */}
       <ParticleSystem 
         state={state} 
@@ -129,30 +129,26 @@ export function Face({ state, config, theme, customAvatar }) {
       />
       {/* Weather Atmosphere */}
       <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
-      {/* Mood halo for SVG face with breathing animation */}
-      <div
-        className="absolute rounded-full pointer-events-none z-10"
-        style={{
-          top: '-10%',
-          left: '-10%',
-          width: '120%',
-          height: '120%',
-          background: `radial-gradient(circle, ${moodColor}30 0%, ${moodColor}15 40%, transparent 70%)`,
-          boxShadow: `0 0 60px ${moodColor}50, 0 0 100px ${moodColor}30`,
-          animation: `breathe ${breathingSpeed} ease-in-out infinite`,
-        }}
-      />
       {/* Face container with 3D tilt */}
-      <div data-testid="face-tilt-wrapper" style={tiltStyle}>
+      <div className="relative z-10 w-full aspect-square" data-testid="face-tilt-wrapper" style={tiltStyle}>
+        {/* Mood halo for SVG face with breathing animation - now inside tilt wrapper like avatar mode */}
+        <div
+          className="absolute -inset-4 rounded-full pointer-events-none"
+          style={{
+            background: `radial-gradient(circle, ${moodColor}40 0%, ${moodColor}20 40%, transparent 70%)`,
+            boxShadow: `0 0 40px ${moodColor}60, 0 0 80px ${moodColor}40`,
+            animation: `breathe ${breathingSpeed} ease-in-out infinite`,
+          }}
+        />
         <svg
-        viewBox="0 0 400 400"
-        className={`w-full h-full transition-all duration-300 relative z-0 ${
-          isThinking ? 'animate-thinking' : ''
-        }`}
-        style={{
-          filter: `drop-shadow(${glowIntensity} ${faceColor}40)`,
-        }}
-      >
+          viewBox="0 0 400 400"
+          className={`w-full h-full transition-all duration-300 relative z-0 ${
+            isThinking ? 'animate-thinking' : ''
+          }`}
+          style={{
+            filter: `drop-shadow(${glowIntensity} ${faceColor}40)`,
+          }}
+        >
       {/* Background circle */}
       <circle
         cx="200"
@@ -316,7 +312,7 @@ export function Face({ state, config, theme, customAvatar }) {
           opacity: 0.5,
         }}
       />
-    </svg>
+        </svg>
       </div> {/* Close the 3D tilt wrapper */}
     </div>
   );
