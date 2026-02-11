@@ -59,6 +59,19 @@ export function Face({ state, config, theme, customAvatar }) {
     return '4s'; // Slow when idle
   }, [isThinking, isSpeaking, state]);
 
+  // Dynamic styles based on state (must be before early return - Rules of Hooks)
+  const faceColor = useMemo(() => {
+    if (isError) return '#ef4444';
+    if (isDisconnected) return '#64748b';
+    return theme?.primary || '#3b82f6';
+  }, [isError, isDisconnected, theme]);
+
+  const glowIntensity = useMemo(() => {
+    // Use expression config for dynamic glow
+    const intensity = Math.round(30 + expressionConfig.glowIntensity * 50);
+    return `0 0 ${intensity}px`;
+  }, [expressionConfig.glowIntensity]);
+
   // If custom avatar is provided, show it instead of SVG
   if (customAvatar) {
     return (
@@ -105,19 +118,6 @@ export function Face({ state, config, theme, customAvatar }) {
       </div>
     );
   }
-
-  // Dynamic styles based on state
-  const faceColor = useMemo(() => {
-    if (isError) return '#ef4444';
-    if (isDisconnected) return '#64748b';
-    return theme?.primary || '#3b82f6';
-  }, [isError, isDisconnected, theme]);
-
-  const glowIntensity = useMemo(() => {
-    // Use expression config for dynamic glow
-    const intensity = Math.round(30 + expressionConfig.glowIntensity * 50);
-    return `0 0 ${intensity}px`;
-  }, [expressionConfig.glowIntensity]);
 
   return (
     <div ref={containerRef} className="w-[80%] h-[80%] max-w-[600px] max-h-[600px] flex items-center justify-center relative">
