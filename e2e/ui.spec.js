@@ -46,7 +46,7 @@ test.describe('Avatar Generator Modal', () => {
     await page.waitForLoadState('networkidle');
     
     // Open the avatar generator
-    await page.click('text=Generate Avatar');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio', { state: 'visible' });
   });
 
@@ -184,7 +184,7 @@ test.describe('Visual Regression', () => {
   test('modal visual snapshot', async ({ page }, testInfo) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.click('text=Generate Avatar');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio', { state: 'visible' });
     await page.waitForTimeout(500);
     
