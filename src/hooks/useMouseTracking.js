@@ -3,10 +3,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 /**
  * useMouseTracking - Track mouse position relative to a container element
  * Returns normalized coordinates (-1 to 1) for eye movement calculations
+ * Also supports device orientation (gyroscope) on mobile for parallax effect
  */
 export function useMouseTracking(containerRef, enabled = true) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isActive, setIsActive] = useState(false);
+  const [isGyroscope, setIsGyroscope] = useState(false);
   const rafRef = useRef(null);
   const targetRef = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
@@ -75,6 +77,34 @@ export function useMouseTracking(containerRef, enabled = true) {
       handleMouseLeave();
     };
 
+    /**
+     * Handle device orientation for mobile gyroscope support
+     * beta: front-to-back tilt (-180 to 180 degrees)
+     * gamma: left-to-right tilt (-90 to 90 degrees)
+     */
+    const handleDeviceOrientation = (e) => {
+      // Check if device orientation data is available
+      if (e.beta === null || e.gamma === null) return;
+
+      // Normalize beta (front-to-back) to y axis
+      // beta ranges from -180 to 180, but typically -90 to 90 in practice
+      // Clamp to reasonable range for natural feel
+      const beta = Math.max(-45, Math.min(45, e.beta));
+      let y = beta / 45; // Normalize to -1 to 1
+
+      // Normalize gamma (left-to-right) to x axis
+      // gamma ranges from -90 to 90
+      const gamma = Math.max(-45, Math.min(45, e.gamma));
+      let x = gamma / 45; // Normalize to -1 to 1
+
+      // Invert y for natural feel (tilting forward should look down)
+      y = -y;
+
+      targetRef.current = { x, y };
+      setIsActive(true);
+      setIsGyroscope(true);
+    };
+
     // Start animation loop
     rafRef.current = requestAnimationFrame(animate);
 
@@ -84,18 +114,33 @@ export function useMouseTracking(containerRef, enabled = true) {
     window.addEventListener('touchmove', handleTouchMove);
     window.addEventListener('touchend', handleTouchEnd);
 
+    // Add device orientation listener for mobile gyroscope support
+    // Check if DeviceOrientationEvent is available
+    if (window.DeviceOrientationEvent) {
+      // On iOS 13+, we need to request permission
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        // Permission will be requested on first user interaction
+        // For now, just add the listener (permission handled elsewhere)
+        window.addEventListener('deviceorientation', handleDeviceOrientation);
+      } else {
+        // Non-iOS or older iOS, just add the listener
+        window.addEventListener('deviceorientation', handleDeviceOrientation);
+      }
+    }
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('deviceorientation', handleDeviceOrientation);
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
     };
   }, [enabled, containerRef, animate]);
 
-  return { position, isActive };
+  return { position, isActive, isGyroscope };
 }
 
 /**
