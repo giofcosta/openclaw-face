@@ -204,7 +204,7 @@ function App() {
             style={{ color: activeTheme.text }}
           >
             <span>⚡</span>
-            <span>{showAvatarGenerator ? 'Back to Face' : 'Generate Avatar'}</span>
+            <span>{showAvatarGenerator ? 'Back to Face' : 'Avatar Studio'}</span>
           </button>
           
           {/* Audio Reactive Toggle */}
