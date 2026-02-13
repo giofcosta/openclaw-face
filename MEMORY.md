@@ -1,10 +1,11 @@
 # MEMORY.md - Kratos Long-Term Memory
 
 ## Task Workflow
-1. Break task → subtasks in `memory/YYYY-MM-DD.md`
-2. Check off `[x]` as you go
-3. Session start: check for `[ ]` and continue
-4. PR opened → move card to "PR opened"
+1. Break task → add subtasks to GitHub issue body (visible to Giovanni)
+2. Track progress in `memory/YYYY-MM-DD.md` (cheap updates)
+3. Check off `[x]` as you go
+4. Session start: check for `[ ]` and continue
+5. PR opened → move card to "PR opened"
 
 ## Giovanni's Rules (ALWAYS FOLLOW)
 - 📝 **Take notes of ALL instructions:** Document everything so I don't forget
@@ -44,8 +45,8 @@
 - **Sync:** Daily auto-push via cron (23:00 UTC)
 
 ## Projects
-### your-moltbot-face
-- Repo: https://github.com/giofcosta/your-moltbot-face
+### openclaw-face (formerly your-moltbot-face)
+- Repo: https://github.com/giofcosta/openclaw-face
 - Visual face UI for Moltbot/Clawdbot
 - Envs: staging (18795), production (18794)
 
