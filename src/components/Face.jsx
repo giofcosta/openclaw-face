@@ -5,8 +5,9 @@ import { WeatherAtmosphere } from './WeatherAtmosphere';
 import { useMouseTracking, calculateEyeOffset } from '../hooks/useMouseTracking';
 import { ParticleSystem } from './ParticleSystem';
 import { useExpression } from '../hooks/useExpression';
+import { ListeningWaves } from './ListeningWaves';
 
-export function Face({ state, config, theme, customAvatar }) {
+export function Face({ state, config, theme, customAvatar, isListening = false }) {
   const containerRef = useRef(null);
   const isThinking = state === STATES.THINKING;
   const isSpeaking = state === STATES.SPEAKING;
@@ -84,6 +85,8 @@ export function Face({ state, config, theme, customAvatar }) {
         />
         {/* Weather Atmosphere */}
         <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
+        {/* Listening Waves */}
+        <ListeningWaves isListening={isListening} theme={theme} />
         <div className="relative z-10" data-testid="face-tilt-wrapper" style={tiltStyle}>
           {/* Mood halo with breathing animation */}
           <div
@@ -129,6 +132,8 @@ export function Face({ state, config, theme, customAvatar }) {
       />
       {/* Weather Atmosphere */}
       <WeatherAtmosphere enabled={config?.animations?.weather !== false} theme={theme} />
+      {/* Listening Waves */}
+      <ListeningWaves isListening={isListening} theme={theme} />
       {/* Face container with 3D tilt */}
       <div className="relative z-10 w-full aspect-square" data-testid="face-tilt-wrapper" style={tiltStyle}>
         {/* Mood halo for SVG face with breathing animation - now inside tilt wrapper like avatar mode */}

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { Face } from './components/Face';
 import { StatusBar } from './components/StatusBar';
 import { ChatBubble } from './components/ChatBubble';
+import { ChatPanel } from './components/ChatPanel';
 import { AvatarGenerator, loadSavedAvatar } from './components/AvatarGenerator';
 import { ThemeSelector } from './components/ThemeSelector';
 import { Confetti } from './components/Confetti';
@@ -10,6 +11,7 @@ import { useGateway } from './hooks/useGateway';
 import { useCelebration } from './hooks/useCelebration';
 import { useAudioReactive } from './hooks/useAudioReactive';
 import { useSoundEffects } from './hooks/useSoundEffects';
+import { useChat } from './hooks/useChat';
 import { getTheme, loadThemePreference, saveThemePreference } from './lib/themePresets';
 
 function App() {
@@ -77,6 +79,10 @@ function App() {
   }, []);
 
   const { state, message, lastResponse, STATES } = useGateway(config);
+  
+  // Chat panel
+  const [chatOpen, setChatOpen] = useState(false);
+  const { messages: chatMessages, isTyping: chatTyping, isListening: chatListening, sendMessage } = useChat();
   
   // Celebration effects
   const { shouldCelebrate, celebrate } = useCelebration(state, lastResponse);
@@ -183,6 +189,7 @@ function App() {
           theme={activeTheme}
           customAvatar={customAvatar}
           audioLevel={audioLevel}
+          isListening={chatListening}
         />
       </div>
 
@@ -261,6 +268,17 @@ function App() {
         onResetToDefault={() => {
           setCustomAvatar(null);
         }}
+      />
+
+      {/* Live Chat Panel */}
+      <ChatPanel
+        isOpen={chatOpen}
+        onToggle={() => setChatOpen(!chatOpen)}
+        messages={chatMessages}
+        onSend={sendMessage}
+        isTyping={chatTyping}
+        isListening={chatListening}
+        theme={activeTheme}
       />
     </div>
   );

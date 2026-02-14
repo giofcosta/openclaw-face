@@ -134,8 +134,15 @@ test.describe('Avatar Generator Modal', () => {
   });
 
   test('modal can be closed', async ({ page }) => {
-    const closeButton = page.locator('button:has-text("✕")');
-    await closeButton.click();
+    // Wait for modal to be fully loaded
+    await expect(page.locator('text=Choose Style')).toBeVisible();
+    
+    // Click the close button (the ✕ in the modal header)
+    const closeButton = page.locator('button:has-text("✕")').first();
+    await closeButton.click({ force: true });
+    
+    // Wait for animation
+    await page.waitForTimeout(400);
     
     // Check that the modal content (Choose Style) is no longer visible
     await expect(page.locator('text=Choose Style')).not.toBeVisible();
