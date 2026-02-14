@@ -47,11 +47,11 @@ export function ChatPanel({
 
   return (
     <>
-      {/* Toggle Button */}
+      {/* Toggle Button - positioned in bottom right to avoid UI conflicts */}
       <button
         onClick={onToggle}
         className={cn(
-          'fixed right-4 top-4 z-50 p-3 rounded-full shadow-lg transition-all duration-300',
+          'fixed right-4 bottom-20 z-40 p-3 rounded-full shadow-lg transition-all duration-300',
           'hover:scale-110 active:scale-95',
           isOpen ? 'bg-white/10' : 'bg-primary'
         )}
