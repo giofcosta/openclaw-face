@@ -1,30 +1,33 @@
 name: Auto-move Project Cards
 
 # This workflow moves project cards when PRs are opened or merged.
-# IMPORTANT: Requires a Personal Access Token (PAT) with 'project' scope
+# Requires a Personal Access Token (PAT) with 'project' and 'repo' scopes
 # stored as repository secret named PROJECT_TOKEN.
-# 
-# To create the PAT:
-# 1. Go to GitHub Settings > Developer settings > Personal access tokens
-# 2. Create a classic token with 'project' scope (for Projects V2)
-# 3. Add it as a repository secret named PROJECT_TOKEN
 
 on:
   pull_request:
     types: [opened, closed]
 
+env:
+  PROJECT_ID: "PVT_kwHOADjgZc4BOBZN"
+  STATUS_FIELD_ID: "PVTSSF_lAHOADjgZc4BOBZNzg82Huw"
+  # Status option IDs
+  TODO_OPTION: "f75ad846"
+  IN_PROGRESS_OPTION: "47fc9ee4"
+  PR_OPENED_OPTION: "a70450ff"
+  IN_REVIEW_OPTION: "d5680462"
+  DONE_OPTION: "98236657"
+
 jobs:
   move-card:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-      repository-projects: write
     steps:
       - name: Debug
         run: |
           echo "Event: ${{ github.event.action }}"
           echo "Merged: ${{ github.event.pull_request.merged }}"
+          echo "PR Body: ${{ github.event.pull_request.body }}"
+
       - name: Move to PR opened
         if: github.event.action == 'opened'
         uses: actions/github-script@v7
@@ -32,7 +35,6 @@ jobs:
           github-token: ${{ secrets.PROJECT_TOKEN }}
           script: |
             console.log('=== Move to PR opened ===');
-            console.log('PR body:', context.payload.pull_request.body);
             
             const body = context.payload.pull_request.body || '';
             const match = body.match(/(?:closes?|fixes?|resolves?)\s*#(\d+)/i);
@@ -46,23 +48,17 @@ jobs:
             console.log(`Found linked issue: #${issueNumber}`);
             
             try {
-              // Get the issue and check project items
-              const issueQuery = `
-                query($owner: String!, $repo: String!, $issueNumber: Int!) {
-                  repository(owner: $owner, name: $repo) {
-                    issue(number: $issueNumber) {
-                      id
-                      title
-                      projectItems(first: 10) {
+              // Query project items directly to find the issue
+              const projectQuery = `
+                query($projectId: ID!) {
+                  node(id: $projectId) {
+                    ... on ProjectV2 {
+                      items(first: 100) {
                         nodes {
                           id
-                          project {
-                            id
-                            title
-                          }
-                          fieldValueByName(name: "Status") {
-                            ... on ProjectV2ItemFieldSingleSelectValue {
-                              name
+                          content {
+                            ... on Issue {
+                              number
                             }
                           }
                         }
@@ -72,63 +68,23 @@ jobs:
                 }
               `;
               
-              const issueResult = await github.graphql(issueQuery, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issueNumber: issueNumber
+              const projectResult = await github.graphql(projectQuery, {
+                projectId: process.env.PROJECT_ID
               });
               
-              console.log('Issue result:', JSON.stringify(issueResult, null, 2));
+              const items = projectResult.node.items.nodes;
+              const projectItem = items.find(item => 
+                item.content && item.content.number === issueNumber
+              );
               
-              const issue = issueResult.repository.issue;
-              if (!issue || !issue.projectItems.nodes.length) {
-                console.log('Issue not found or not in any project');
+              if (!projectItem) {
+                console.log(`Issue #${issueNumber} not found in project`);
                 return;
               }
               
-              const projectItem = issue.projectItems.nodes[0];
-              console.log('Project item:', projectItem);
+              console.log('Found project item:', projectItem.id);
               
-              // Get the Status field options for this project
-              const fieldQuery = `
-                query($projectId: ID!) {
-                  node(id: $projectId) {
-                    ... on ProjectV2 {
-                      field(name: "Status") {
-                        ... on ProjectV2SingleSelectField {
-                          id
-                          options {
-                            id
-                            name
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              `;
-              
-              const fieldResult = await github.graphql(fieldQuery, {
-                projectId: projectItem.project.id
-              });
-              
-              console.log('Field result:', JSON.stringify(fieldResult, null, 2));
-              
-              const statusField = fieldResult.node.field;
-              if (!statusField) {
-                console.log('Status field not found in project');
-                return;
-              }
-              
-              const prOpenedOption = statusField.options.find(o => o.name === 'PR opened');
-              if (!prOpenedOption) {
-                console.log('PR opened option not found. Available options:', statusField.options.map(o => o.name));
-                return;
-              }
-              
-              console.log('Moving to PR opened with option ID:', prOpenedOption.id);
-              
-              // Move the card
+              // Move the card to "PR opened"
               const moveResult = await github.graphql(`
                 mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                   updateProjectV2ItemFieldValue(
@@ -141,22 +97,16 @@ jobs:
                   ) {
                     projectV2Item { 
                       id
-                      fieldValueByName(name: "Status") {
-                        ... on ProjectV2ItemFieldSingleSelectValue {
-                          name
-                        }
-                      }
                     }
                   }
                 }
               `, {
-                projectId: projectItem.project.id,
+                projectId: process.env.PROJECT_ID,
                 itemId: projectItem.id,
-                fieldId: statusField.id,
-                optionId: prOpenedOption.id
+                fieldId: process.env.STATUS_FIELD_ID,
+                optionId: process.env.PR_OPENED_OPTION
               });
               
-              console.log('Move result:', JSON.stringify(moveResult, null, 2));
               console.log(`Successfully moved issue #${issueNumber} to "PR opened"`);
               
             } catch (error) {
@@ -172,7 +122,6 @@ jobs:
           script: |
             console.log('=== Move to Done ===');
             console.log('PR merged:', context.payload.pull_request.merged);
-            console.log('PR body:', context.payload.pull_request.body);
             
             const body = context.payload.pull_request.body || '';
             const match = body.match(/(?:closes?|fixes?|resolves?)\s*#(\d+)/i);
@@ -186,23 +135,17 @@ jobs:
             console.log(`Found linked issue: #${issueNumber}`);
             
             try {
-              // Get the issue and check project items
-              const issueQuery = `
-                query($owner: String!, $repo: String!, $issueNumber: Int!) {
-                  repository(owner: $owner, name: $repo) {
-                    issue(number: $issueNumber) {
-                      id
-                      title
-                      projectItems(first: 10) {
+              // Query project items directly to find the issue
+              const projectQuery = `
+                query($projectId: ID!) {
+                  node(id: $projectId) {
+                    ... on ProjectV2 {
+                      items(first: 100) {
                         nodes {
                           id
-                          project {
-                            id
-                            title
-                          }
-                          fieldValueByName(name: "Status") {
-                            ... on ProjectV2ItemFieldSingleSelectValue {
-                              name
+                          content {
+                            ... on Issue {
+                              number
                             }
                           }
                         }
@@ -212,64 +155,23 @@ jobs:
                 }
               `;
               
-              const issueResult = await github.graphql(issueQuery, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issueNumber: issueNumber
+              const projectResult = await github.graphql(projectQuery, {
+                projectId: process.env.PROJECT_ID
               });
               
-              console.log('Issue result:', JSON.stringify(issueResult, null, 2));
+              const items = projectResult.node.items.nodes;
+              const projectItem = items.find(item => 
+                item.content && item.content.number === issueNumber
+              );
               
-              const issue = issueResult.repository.issue;
-              if (!issue || !issue.projectItems.nodes.length) {
-                console.log('Issue not found or not in any project');
+              if (!projectItem) {
+                console.log(`Issue #${issueNumber} not found in project`);
                 return;
               }
               
-              const projectItem = issue.projectItems.nodes[0];
-              console.log('Project item:', projectItem);
-              console.log('Current status:', projectItem.fieldValueByName?.name);
+              console.log('Found project item:', projectItem.id);
               
-              // Get the Status field options for this project
-              const fieldQuery = `
-                query($projectId: ID!) {
-                  node(id: $projectId) {
-                    ... on ProjectV2 {
-                      field(name: "Status") {
-                        ... on ProjectV2SingleSelectField {
-                          id
-                          options {
-                            id
-                            name
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              `;
-              
-              const fieldResult = await github.graphql(fieldQuery, {
-                projectId: projectItem.project.id
-              });
-              
-              console.log('Field result:', JSON.stringify(fieldResult, null, 2));
-              
-              const statusField = fieldResult.node.field;
-              if (!statusField) {
-                console.log('Status field not found in project');
-                return;
-              }
-              
-              const doneOption = statusField.options.find(o => o.name === 'Done');
-              if (!doneOption) {
-                console.log('Done option not found. Available options:', statusField.options.map(o => o.name));
-                return;
-              }
-              
-              console.log('Moving to Done with option ID:', doneOption.id);
-              
-              // Move the card
+              // Move the card to "Done"
               const moveResult = await github.graphql(`
                 mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                   updateProjectV2ItemFieldValue(
@@ -282,22 +184,16 @@ jobs:
                   ) {
                     projectV2Item { 
                       id
-                      fieldValueByName(name: "Status") {
-                        ... on ProjectV2ItemFieldSingleSelectValue {
-                          name
-                        }
-                      }
                     }
                   }
                 }
               `, {
-                projectId: projectItem.project.id,
+                projectId: process.env.PROJECT_ID,
                 itemId: projectItem.id,
-                fieldId: statusField.id,
-                optionId: doneOption.id
+                fieldId: process.env.STATUS_FIELD_ID,
+                optionId: process.env.DONE_OPTION
               });
               
-              console.log('Move result:', JSON.stringify(moveResult, null, 2));
               console.log(`Successfully moved issue #${issueNumber} to "Done"`);
               
             } catch (error) {

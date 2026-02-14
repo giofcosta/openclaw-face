@@ -27,8 +27,9 @@ export function WeatherAtmosphere({ enabled = true, theme }) {
     const ctx = canvas.getContext('2d');
 
     const resize = () => {
-      canvas.width = canvas.parentElement?.offsetWidth || 400;
-      canvas.height = canvas.parentElement?.offsetHeight || 400;
+      // Use window dimensions for full-screen overlay
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
     resize();
     window.addEventListener('resize', resize);
@@ -83,7 +84,7 @@ export function WeatherAtmosphere({ enabled = true, theme }) {
     <canvas
       ref={canvasRef}
       data-testid="weather-canvas"
-      className="absolute inset-0 pointer-events-none z-0"
+      className="fixed inset-0 pointer-events-none z-0"
       style={{ opacity: 0.6 }}
     />
   );

@@ -13,7 +13,7 @@ test.describe('Avatar Generation', () => {
 
   test('avatar generation completes without error', async ({ page }) => {
     // Open avatar generator
-    await page.click('text=Generate');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio');
 
     // Click generate and wait for result
@@ -36,7 +36,7 @@ test.describe('Avatar Generation', () => {
 
   test('generated avatar URL is valid', async ({ page }) => {
     // Open avatar generator
-    await page.click('text=Generate');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio');
 
     // Generate
@@ -91,7 +91,7 @@ test.describe('Avatar Generation', () => {
 
   test('avatar history shows generated items', async ({ page }) => {
     // Open avatar generator
-    await page.click('text=Generate');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio');
 
     // Generate an avatar
@@ -123,7 +123,7 @@ test.describe('Avatar Generation', () => {
     await page.waitForLoadState('networkidle');
     
     // Open avatar generator
-    await page.click('text=Generate');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio');
     
     // Should see "Use CSS Face" button since we have a custom avatar
@@ -143,7 +143,7 @@ test.describe('Avatar Generation', () => {
 
   test('style selection changes avatar seed', async ({ page }) => {
     // Open avatar generator
-    await page.click('text=Generate');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio');
 
     // Select different styles and verify they're selectable
@@ -160,7 +160,7 @@ test.describe('Avatar Generation', () => {
 
   test('provider selection changes the avatar provider', async ({ page }) => {
     // Open avatar generator
-    await page.click('text=Generate');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio');
 
     // Check that provider section heading is visible

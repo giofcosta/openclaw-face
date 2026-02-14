@@ -16,7 +16,7 @@ test.describe('Weather Atmosphere Effects', () => {
     const canvas = page.locator('[data-testid="weather-canvas"]');
     await expect(canvas).toBeVisible();
     const className = await canvas.getAttribute('class');
-    expect(className).toContain('absolute');
+    expect(className).toContain('fixed');
     expect(className).toContain('inset-0');
     expect(className).toContain('z-0');
   });
@@ -38,7 +38,7 @@ test.describe('Weather Atmosphere Effects', () => {
 
   test('face elements remain interactive with weather enabled', async ({ page }) => {
     // The weather should not block the avatar button
-    const avatarButton = page.getByRole('button', { name: /generate avatar/i });
+    const avatarButton = page.getByRole('button', { name: /avatar studio/i });
     await expect(avatarButton).toBeVisible();
     await avatarButton.click();
     

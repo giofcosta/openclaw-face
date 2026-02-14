@@ -46,7 +46,7 @@ test.describe('Avatar Generator Modal', () => {
     await page.waitForLoadState('networkidle');
     
     // Open the avatar generator
-    await page.click('text=Generate Avatar');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio', { state: 'visible' });
   });
 
@@ -137,7 +137,8 @@ test.describe('Avatar Generator Modal', () => {
     const closeButton = page.locator('button:has-text("✕")');
     await closeButton.click();
     
-    await expect(page.locator('text=Avatar Studio')).not.toBeVisible();
+    // Check that the modal content (Choose Style) is no longer visible
+    await expect(page.locator('text=Choose Style')).not.toBeVisible();
   });
 
   test('toast component exists and can be triggered', async ({ page }) => {
@@ -184,7 +185,7 @@ test.describe('Visual Regression', () => {
   test('modal visual snapshot', async ({ page }, testInfo) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.click('text=Generate Avatar');
+    await page.click('text=Avatar Studio');
     await page.waitForSelector('text=Avatar Studio', { state: 'visible' });
     await page.waitForTimeout(500);
     
