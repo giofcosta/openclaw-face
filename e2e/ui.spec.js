@@ -137,7 +137,8 @@ test.describe('Avatar Generator Modal', () => {
     const closeButton = page.locator('button:has-text("✕")');
     await closeButton.click();
     
-    await expect(page.locator('text=Avatar Studio')).not.toBeVisible();
+    // Check that the modal content (Choose Style) is no longer visible
+    await expect(page.locator('text=Choose Style')).not.toBeVisible();
   });
 
   test('toast component exists and can be triggered', async ({ page }) => {
