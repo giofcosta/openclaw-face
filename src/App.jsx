@@ -82,7 +82,15 @@ function App() {
   
   // Chat panel
   const [chatOpen, setChatOpen] = useState(false);
-  const { messages: chatMessages, isTyping: chatTyping, isListening: chatListening, sendMessage } = useChat();
+  const { 
+    messages: chatMessages, 
+    isTyping: chatTyping, 
+    isListening: chatListening, 
+    isConnected: chatConnected,
+    error: chatError,
+    sendMessage,
+    reconnect: chatReconnect 
+  } = useChat();
   
   // Celebration effects
   const { shouldCelebrate, celebrate } = useCelebration(state, lastResponse);
@@ -190,6 +198,9 @@ function App() {
           customAvatar={customAvatar}
           audioLevel={audioLevel}
           isListening={chatListening}
+          isConnected={chatConnected}
+          error={chatError}
+          onReconnect={chatReconnect}
         />
       </div>
 

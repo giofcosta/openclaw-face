@@ -12,6 +12,9 @@ export function ChatPanel({
   onSend, 
   isTyping = false,
   isListening = false,
+  isConnected = false,
+  error = null,
+  onReconnect,
   theme 
 }) {
   const [inputValue, setInputValue] = useState('');
@@ -100,8 +103,11 @@ export function ChatPanel({
           </div>
           <div className="flex-1">
             <h3 className="text-white font-semibold text-sm">Kratos</h3>
-            <p className="text-white/50 text-xs">
-              {isListening ? 'Listening...' : isTyping ? 'Typing...' : 'Online'}
+            <p className={cn(
+              "text-xs",
+              isConnected ? "text-white/50" : "text-red-400"
+            )}>
+              {!isConnected ? 'Disconnected' : isListening ? 'Listening...' : isTyping ? 'Typing...' : 'Online'}
             </p>
           </div>
           {/* Listening indicator */}
@@ -118,12 +124,27 @@ export function ChatPanel({
           )}
         </div>
 
+        {/* Error banner */}
+        {error && (
+          <div className="px-4 py-2 bg-red-500/20 border-b border-red-500/30">
+            <p className="text-red-300 text-xs">{error}</p>
+            {onReconnect && (
+              <button 
+                onClick={onReconnect}
+                className="text-red-200 text-xs underline mt-1 hover:text-white"
+              >
+                Retry connection
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.length === 0 ? (
             <div className="text-center text-white/30 py-8">
               <p className="text-sm">No messages yet</p>
-              <p className="text-xs mt-1">Start a conversation!</p>
+              <p className="text-xs mt-1">{isConnected ? 'Start a conversation!' : 'Connecting...'}</p>
             </div>
           ) : (
             messages.map((msg, idx) => (
