@@ -67,7 +67,12 @@
 ## Infrastructure
 - **Server:** 3.21.244.33
 - **VNC:** port 5901
-- **Gateway:** port 18789
+- **Gateway:** port 38191
 - **Chrome profile:** ~/.config/google-chrome-copy
-- **Moltbot-face staging:** port 18795 (internal: 172.31.1.170)
+- **Moltbot-face staging:** port 18795 (nginx proxy → 18797 frontend, 18796 bridge)
 - **Moltbot-face production:** port 18794
+- **Bridge server:** port 18796 (openclaw-face-server)
+
+## ⚠️ STORAGE ALERT (2026-02-17)
+- Disk at 98% (854MB free of 29GB)
+- Needs cleanup: PM2 logs, npm cache, temp files
